@@ -18,3 +18,5 @@ function App() {
 }
 
 export default App;
+// Bu satır Git testi içindir
+
