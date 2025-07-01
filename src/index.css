@@ -4,7 +4,8 @@ html {
   padding: 0;
   font-family: Arial, sans-serif;
   height: 100%;
-  background-color: #f5f5f5;
+  background-color: #111;
+
 }
 
 .app-container {
@@ -21,13 +22,15 @@ html {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-right: none;
+  box-shadow: 2px 0px 8px -2px rgba(182, 182, 182, 0.499);
 }
 
 .logo {
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 20px;
-  color: #e44;
+  color: rgb(185, 190, 151);
 }
 
 .search-input {
@@ -45,7 +48,7 @@ html {
 .menu-title {
   font-weight: bold;
   margin-bottom: 10px;
-  color: #ccc;
+  color: #26aca3;
 }
 
 .menu-button {
@@ -61,7 +64,7 @@ html {
 }
 
 .menu-button:hover {
-  background-color: #444;
+  background-color: #7c7c7c;
 }
 
 .menu-item {
@@ -82,21 +85,23 @@ html {
   color: #999;
 }
 
-.user-info {
+/*.user-info {
   font-size: 14px;
   color: #bbb;
   padding-top: 20px;
   border-top: 1px solid #333;
-}
+}*/
 
 .main-content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  color: #d64e4e;
 }
 
 .conversation-list {
   margin-top: 20px;
+  color: #111;
 }
 
 .conversation-item {
@@ -106,8 +111,63 @@ html {
   border-radius: 6px;
   margin-bottom: 10px;
   transition: background 0.3s;
+
 }
 
 .conversation-item:hover {
   background-color: #f0f0f0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 2px;
+}
+
+.tab {
+  padding: 6px 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 15px;
+  color: #333;
+  transition: border 0.2s, color 0.2s;
+  margin-right: 2px;
+}
+
+.sidebar-divider {
+  border: none;
+  border-top: 1px solid #cabcbc;
+  /* Gri ton */
+  margin: 12px 0;
+  opacity: 0.7;
+}
+
+.user-info-box {
+  background: #181818;
+  border-radius: 8px;
+  padding: 14px 12px;
+  margin-top: 18px;
+  margin-bottom: 0;
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.3);
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.user-info-box .user-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+}
+
+.user-info-box .user-mail {
+  font-size: 13px;
+  color: #d7d6d6;
+  word-break: break-all;
+
 }
