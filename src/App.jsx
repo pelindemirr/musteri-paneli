@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Sidebar from "./components/sidebar";
 import ChatList from "./components/chatlist";
 import ChatWindow from "./components/chatwindow";
@@ -15,6 +15,7 @@ const withTimestamps = (messages) =>
 const dummyConversations = [
   {
     id: 1,
+    customerNo: "20240001",
     name: "Emre",
     platform: "whatsapp",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
@@ -25,27 +26,14 @@ const dummyConversations = [
     status: "Bekliyor",
     messages: withTimestamps([
       { sender: "Emre", text: "Merhaba!" },
-      { sender: "Siz", text: "Merhaba, nasıl yardımcı olabilirim?" },
-      { sender: "Emre", text: "Bir konuda desteğe ihtiyacım var." },
-      { sender: "Siz", text: "Tabii, nasıl yardımcı olabilirim?" },
-      { sender: "Emre", text: "Hesabımda bir sorun var." },
-      { sender: "Siz", text: "Detay verebilir misiniz?" },
-      { sender: "Emre", text: "Oturum açmaya çalıştığımda 'hatalı şifre' uyarısı alıyorum." },
-      { sender: "Siz", text: "Şifrenizi yakın zamanda değiştirdiniz mi?" },
-      { sender: "Emre", text: "Hayır, uzun zamandır aynı şifreyi kullanıyorum." },
-      { sender: "Siz", text: "Size bir şifre sıfırlama bağlantısı gönderebilirim, e-posta adresinizi paylaşır mısınız?" },
-      { sender: "Emre", text: "Tabii, emre@example.com" },
-      { sender: "Siz", text: "Teşekkürler. Şifre sıfırlama bağlantısını şimdi gönderdim. Gelen kutunuzu kontrol edebilir misiniz?" },
-      { sender: "Emre", text: "Evet, geldi. Şifreyi değiştiriyorum." },
-      { sender: "Siz", text: "Yeni şifrenizle oturum açmayı deneyin lütfen." },
-      { sender: "Emre", text: "Oldu! Şimdi giriş yapabiliyorum, çok teşekkürler." },
-      { sender: "Siz", text: "Rica ederim 😊 Başka bir konuda yardımcı olabilir miyim?" },
-      { sender: "Emre", text: "Hayır, hepsi bu kadar. İyi günler!" },
-      { sender: "Siz", text: "Size de iyi günler dilerim." }
+      { sender: "Siz", text: "Size nasıl yardımcı olabilirim?" },
+      { sender: "Emre", text: "Faturamı bulamıyorum." },
+      { sender: "Siz", text: "Hemen yardımcı oluyorum." },
     ]),
   },
   {
     id: 2,
+    customerNo: "20240002",
     name: "İrem",
     platform: "facebook",
     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
@@ -63,6 +51,7 @@ const dummyConversations = [
   },
   {
     id: 3,
+    customerNo: "20240003",
     name: "Dilara",
     platform: "web",
     avatar: "",
@@ -80,6 +69,7 @@ const dummyConversations = [
   },
   {
     id: 4,
+    customerNo: "20240004",
     name: "Azra",
     platform: "email",
     avatar: "https://randomuser.me/api/portraits/women/4.jpg",
@@ -97,6 +87,7 @@ const dummyConversations = [
   },
   {
     id: 5,
+    customerNo: "20240005",
     name: "Alper",
     platform: "whatsapp",
     avatar: "",
@@ -117,6 +108,7 @@ const dummyConversations = [
   },
   {
     id: 6,
+    customerNo: "20240006",
     name: "Pelin",
     platform: "facebook",
     avatar: "https://randomuser.me/api/portraits/women/6.jpg",
@@ -136,6 +128,7 @@ const dummyConversations = [
   },
   {
     id: 7,
+    customerNo: "20240007",
     name: "Selin",
     platform: "web",
     avatar: "",
@@ -156,6 +149,7 @@ const dummyConversations = [
   },
   {
     id: 8,
+    customerNo: "20240008",
     name: "Yağmur",
     platform: "email",
     avatar: "https://randomuser.me/api/portraits/women/8.jpg",
@@ -174,6 +168,7 @@ const dummyConversations = [
   },
   {
     id: 9,
+    customerNo: "20240009",
     name: "Ayşe",
     platform: "whatsapp",
     avatar: "",
@@ -196,11 +191,21 @@ function App() {
   const [conversations, setConversations] = useState(dummyConversations);
   const [selectedId, setSelectedId] = useState(conversations[0]?.id || null);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Sohbet filtreleme state'i: 'all', 'waiting', 'answered'
+  const [conversationFilter, setConversationFilter] = useState('all');
 
   const selectedConversation = conversations.find((c) => c.id === selectedId);
-  const visibleConversations = showOnlyFavorites
-    ? conversations.filter((c) => c.isFavorite)
-    : conversations;
+  const visibleConversations = conversations.filter((c) => {
+    // Önce favori filtresi
+    if (showOnlyFavorites && !c.isFavorite) return false;
+    // Sonra durum filtresi
+    if (conversationFilter === 'waiting' && c.status !== 'Bekliyor') return false;
+    if (conversationFilter === 'answered' && c.status !== 'Yanıtlandı') return false;
+    return true;
+  });
+
+  const handleToggleSidebar = () => setSidebarCollapsed((v) => !v);
 
   // Favori ekleme / çıkarma
   const toggleFavorite = (id) => {
@@ -210,7 +215,7 @@ function App() {
     setConversations(updated);
   };
 
-  // Mesaj gönderme (hazır mesajlar için de kullanılır)
+  // Mesaj gönderme 
   const handleSendMessage = (text) => {
     setConversations((prevConvs) =>
       prevConvs.map((conv) =>
@@ -221,15 +226,18 @@ function App() {
               ...conv.messages,
               { sender: "Siz", text, timestamp: new Date() },
             ],
+            status: conv.status === 'Bekliyor' ? 'Yanıtlandı' : conv.status,
           }
           : conv
       )
     );
   };
 
-  // Örnek müşteri bilgisi (gerekirse yukarıya ekle)
+  // Örnek müşteri bilgisi (gerekirse yukarıya ekleme yapıcam)
   const customer = selectedConversation
     ? {
+      id: selectedConversation.id,
+      customerNo: selectedConversation.customerNo,
       name: selectedConversation.name,
       info: "Kullanıcı bilgileri",
       avatar: selectedConversation.avatar,
@@ -238,6 +246,8 @@ function App() {
       email: selectedConversation.email
     }
     : {
+      id: "-",
+      customerNo: "-",
       name: "Müşteri",
       info: "Kullanıcı bilgileri",
       avatar: "https://randomuser.me/api/portraits/men/32.jpg",
@@ -276,14 +286,40 @@ function App() {
     );
   };
 
+  // Bugünün tarihi (sadece yıl-ay-gün)
+  const today = new Date();
+  const isToday = (date) => {
+    if (!date) return false;
+    const d = new Date(date);
+    return d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate();
+  };
+  // Günlük konuşma sayısı (bugün başlayan tüm sohbetler)
+  const dailyConversations = conversations.filter(c => isToday(c.startedAt));
+  // Günlük yanıtlanan sayısı (bugün kapatılan sohbetler)
+  const dailyAnswered = conversations.filter(c => c.status === 'Kapatıldı' && isToday(c.endedAt));
+
   return (
     <div className="app-container">
       <Sidebar
         showFavorites={showOnlyFavorites}
         onToggleFavorites={setShowOnlyFavorites}
+        collapsed={sidebarCollapsed}
+        onToggleSidebar={handleToggleSidebar}
+        conversationFilter={conversationFilter}
+        onConversationFilterChange={setConversationFilter}
+        dailyConversationCount={dailyConversations.length}
+        dailyAnsweredCount={dailyAnswered.length}
       />
       <div className="main-content">
-        <div className="chatlist-panel">
+        <div
+          className="chatlist-panel"
+          style={{
+            width: sidebarCollapsed ? 380 : 300,
+            transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)',
+          }}
+        >
           <ChatList
             conversations={visibleConversations}
             selectedId={selectedId}
@@ -294,7 +330,11 @@ function App() {
           />
         </div>
         <div className="chatwindow-panel">
-          <ChatWindow conversation={selectedConversation} />
+          <ChatWindow
+            conversation={selectedConversation}
+            onEndChat={handleEndChat}
+            onStartChat={handleStartChat}
+          />
         </div>
         <div className="customer-panel-wrapper">
           <CustomerPanel

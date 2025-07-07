@@ -23,7 +23,7 @@ const platformIcons = {
     whatsapp: <FaWhatsapp color='#25D366' title="WhatsApp" />,
     facebook: <FaFacebookMessenger color='#0084FF' title="Facebook Messenger" />,
     email: <FiMail color='#ffb300' title="Email" />,
-    web: <FiGlobe color='#26aca3' title="Web" />,
+    web: <FiGlobe color='#275db5' title="Web" />,
     default: <FiMessageCircle color='#aaa' title="Bilinmiyor" />
 };
 
@@ -37,7 +37,7 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
 
     return (
         <div style={{ padding: 16 }}>
-            <h3 style={{ color: "#26aca3" }}>Sohbetler</h3>
+            <h3 style={{ color: "#275db5" }}>Sohbetler</h3>
             {conversations.map((conv) => {
                 const lastMessage = conv.messages[conv.messages.length - 1];
 
@@ -119,77 +119,68 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                         style={{
                             padding: 12,
                             marginBottom: 8,
-                            backgroundColor: conv.id === selectedId ? "#d64e4e" : "#f2f2f2",
-                            color: conv.id === selectedId ? "white" : "#333",
+                            backgroundColor: conv.id === selectedId ? "#275db5" : "#23262b",
+                            color: conv.id === selectedId ? "#fff" : "#f3f3f3",
                             borderRadius: 6,
                             cursor: "pointer",
-                            position: "relative"
+                            position: "relative",
+                            border: conv.id === selectedId ? '2px solid #275db5' : '1px solid #23262b',
+                            boxShadow: conv.id === selectedId ? '0 2px 8px -2px #275db588' : 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            minHeight: 80
                         }}
                     >
-                        {/* TOPLAM SOHBET SÜRESİ SAYAÇ */}
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 2, gap: 8 }}>
-                            <span className="timer-bar-total" style={{ fontWeight: 'normal', color: '#888', fontSize: 11 }}>{totalMin}:{totalS}</span>
-                        </div>
-                        {/* BAR TIMER ve Müşteri Bekleme Süresi */}
-                        <div className="timer-bar-wrapper" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div
-                                className="timer-bar"
-                                style={{
-                                    width: `${barWidth}%`,
-                                    background: barColor,
-                                    transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1), background 0.7s',
-                                }}
-                            />
-                            <span className="timer-bar-time" style={{ fontSize: 13, color: '#333' }}>Bekleme: {min}:{sec}</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <div className="chatlist-avatar-wrapper">
-                                {conv.avatar ? (
-                                    <>
-                                        <img src={conv.avatar} alt={conv.name} className="chatlist-avatar mini" />
-                                        <span className="platform-icon badge">
-                                            {platformIcons[conv.platform] || platformIcons.default}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span className="platform-icon mini-only">
-                                        {platformIcons[conv.platform] || platformIcons.default}
-                                    </span>
-                                )}
+                        {/* ÜST: Avatar, İsim, Favori Yıldız, Timer */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div className="chatlist-avatar-wrapper">
+                                    {conv.avatar ? (
+                                        <>
+                                            <img src={conv.avatar} alt={conv.name} className="chatlist-avatar mini" />
+                                            <span className="platform-icon badge">
+                                                {platformIcons[conv.platform] || platformIcons.default}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="platform-icon mini-only">
+                                                {platformIcons[conv.platform] || platformIcons.default}
+                                            </span>
+                                            <span className="platform-icon badge">
+                                                {platformIcons[conv.platform] || platformIcons.default}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                                <strong style={{ color: conv.id === selectedId ? '#fff' : '#f3f3f3', fontSize: 15 }}>{conv.name}</strong>
+                                <span style={{ fontWeight: 'normal', color: '#bbb', fontSize: 12, marginLeft: 6 }}>{totalMin}:{totalS}</span>
                             </div>
-                            <strong>{conv.name}</strong>
-                        </div>
-                        {/* Sohbeti Bitir butonu: sadece seçili ve aktif/yanıtlandı ise, sağ üst köşede */}
-                        {(conv.id === selectedId && (conv.status === "Aktif" || conv.status === "Yanıtlandı")) && (
-                            <button
-                                onClick={e => { e.stopPropagation(); onEndChat(conv.id); }}
+                            <span
+                                onClick={e => { e.stopPropagation(); onToggleFavorite(conv.id); }}
                                 style={{
-                                    position: 'absolute',
-                                    top: 10,
-                                    right: 12,
-                                    background: '#d64e4e',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: 6,
-                                    padding: '6px 18px',
-                                    fontWeight: 600,
-                                    fontSize: 14,
+                                    marginLeft: 8,
                                     cursor: 'pointer',
-                                    zIndex: 2,
-                                    boxShadow: '0 2px 8px -2px #d64e4e44'
+                                    fontSize: 18,
+                                    color: conv.isFavorite ? '#ffb300' : '#888',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    userSelect: 'none'
                                 }}
-                            >Sohbeti Bitir</button>
-                        )}
-                        {/* Sohbete Dahil Ol butonu: Bekliyor veya Kapatıldı ise */}
-                        {(conv.status === "Bekliyor" || conv.status === "Kapatıldı") && (
-                            <button onClick={e => { e.stopPropagation(); onStartChat(conv.id); }} style={{ marginTop: 8, background: '#26aca3', color: 'white', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}>Sohbete Dahil Ol</button>
-                        )}
+                                title={conv.isFavorite ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill={conv.isFavorite ? '#ffb300' : 'none'} stroke={conv.isFavorite ? '#ffb300' : '#888'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polygon points="10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.1 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36" />
+                                </svg>
+                            </span>
+                        </div>
+                        {/* Son Mesaj */}
                         {lastMessage && (
                             <div
                                 style={{
                                     fontSize: "13px",
-                                    marginTop: 4,
-                                    color: conv.id === selectedId ? "#f3f3f3" : "#666",
+                                    marginTop: 2,
+                                    color: conv.id === selectedId ? "#e0e0e0" : "#bbb",
                                     display: "flex",
                                     justifyContent: "space-between",
                                 }}
@@ -207,6 +198,20 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                                 <span style={{ marginLeft: 8 }}>{formatTime(lastMessage.timestamp)}</span>
                             </div>
                         )}
+                        {/* ALT: Bar ve Bekleme Süresi */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                            <div
+                                className="timer-bar"
+                                style={{
+                                    width: `${barWidth}%`,
+                                    background: barColor,
+                                    height: 6,
+                                    borderRadius: 4,
+                                    transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1), background 0.7s',
+                                    minWidth: 24
+                                }}
+                            />
+                        </div>
                     </div>
                 );
             })}

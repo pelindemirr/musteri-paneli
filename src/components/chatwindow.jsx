@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { FiAlertCircle, FiTrash2, FiChevronDown, FiChevronUp, FiEdit2, FiClock, FiCheckCircle, FiRepeat, FiLock } from "react-icons/fi";
+import React, { useState, useRef, useEffect } from "react";
+import { FiAlertCircle, FiTrash2, FiChevronDown, FiChevronUp, FiEdit2, FiClock, FiCheckCircle, FiRepeat, FiLock, FiUser, FiSave, FiX } from "react-icons/fi";
+import { FaWhatsapp, FaFacebookMessenger } from "react-icons/fa";
+import { FiMail, FiGlobe, FiMessageCircle } from "react-icons/fi";
 
 // Saat formatlama yardımcı fonksiyonu
 function formatTime(date) {
@@ -12,98 +14,103 @@ function formatTime(date) {
 // Durum-ikon eşleştirme fonksiyonu (react-icons ile)
 const statusIcons = {
     "Bekliyor": { icon: <FiClock style={{ color: '#f39c12', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Müşteri mesaj attı, temsilci henüz yanıtlamadı." },
-    "Yanıtlandı": { icon: <FiCheckCircle style={{ color: '#26aca3', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Temsilci yanıt verdi, akış devam ediyor." },
+    "Yanıtlandı": { icon: <FiCheckCircle style={{ color: '#275db5', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Temsilci yanıt verdi, akış devam ediyor." },
     "Yönlendirildi": { icon: <FiRepeat style={{ color: '#3498db', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Başka temsilciye ya da yöneticiye aktarıldı." },
     "Kapatıldı": { icon: <FiLock style={{ color: '#888', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Sohbet tamamlandı, müşteri teşekkür etti vb." },
 };
 
 const statusOptions = ["Bekliyor", "Yanıtlandı", "Yönlendirildi", "Kapatıldı"];
 
-function ChatWindow({ conversation }) {
+// Platform-ikon eşleştirme objesi (chatlist.jsx ile aynı)
+const platformIcons = {
+    whatsapp: <FaWhatsapp color="#25D366" title="WhatsApp" style={{ fontSize: 16, verticalAlign: 'middle' }} />,
+    facebook: <FaFacebookMessenger color="#0084FF" title="Facebook Messenger" style={{ fontSize: 16, verticalAlign: 'middle' }} />,
+    email: <FiMail color="#ffb300" title="Email" style={{ fontSize: 16, verticalAlign: 'middle' }} />,
+    web: <FiGlobe color="#275db5" title="Web" style={{ fontSize: 16, verticalAlign: 'middle' }} />,
+    default: <FiMessageCircle color="#aaa" title="Bilinmiyor" style={{ fontSize: 16, verticalAlign: 'middle' }} />
+};
+
+function ChatWindow({ conversation, onEndChat, onStartChat }) {
+    // Tüm hook'lar en başta
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportReason, setReportReason] = useState("");
-    const [note, setNote] = useState("");
     const [savedNote, setSavedNote] = useState("");
+    const [note, setNote] = useState("");
     const [noteOpen, setNoteOpen] = useState(true);
-    // KVKK onay state
     const [kvkkChoice, setKvkkChoice] = useState(null);
-    // Durum state'i (backend ile entegre olunca prop ile alınabilir)
     const [status, setStatus] = useState(conversation.status || "Bekliyor");
     const [editStatus, setEditStatus] = useState(false);
+    const [showEndChatModal, setShowEndChatModal] = useState(false);
+    const [showEndEndedModal, setShowEndEndedModal] = useState(false);
+    const [oldLoading, setOldLoading] = useState(false);
+    const [oldMessages, setOldMessages] = useState([]);
+    const [oldBatch, setOldBatch] = useState(0);
+    const messagesEndRef = useRef(null);
+
+    // eski mesajları görüntüleme / geçmiş sohbetler
+    // Tüm eski mesajlar (örnek sahte veri)
+    const allFakeOldMessages = [
+        {
+            sender: 'Pelin',
+            text: 'Merhaba, yardım almak istiyorum. (1)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
+        },
+        {
+            sender: 'Siz',
+            text: 'Daha önceki bir mesaj (2)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2 + 60000),
+        },
+        {
+            sender: 'Pelin',
+            text: 'Daha önceki bir mesaj (3)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2 + 120000),
+        },
+        {
+            sender: 'Pelin',
+            text: 'İyi günler. (4)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2 + 180000),
+        },
+        {
+            sender: 'Siz',
+            text: 'Daha eski bir mesaj (5)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
+        },
+        {
+            sender: 'Pelin',
+            text: 'Daha eski bir mesaj (6)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3 + 60000),
+        },
+        {
+            sender: 'Siz',
+            text: 'Daha eski bir mesaj (7)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3 + 120000),
+        },
+        {
+            sender: 'Pelin',
+            text: 'Daha eski bir mesaj (8)',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3 + 180000),
+        },
+    ];
+    // Kaç mesaj bir seferde yüklensin?
+    const OLD_MESSAGES_BATCH_SIZE = 5;
+    // Şu ana kadar yüklenen eski mesajlar
+    const [allOldLoaded] = useState(oldBatch * OLD_MESSAGES_BATCH_SIZE >= allFakeOldMessages.length);
 
     // KVKK modalı
     function handleKvkkChoice(choice) {
         setKvkkChoice(choice);
         // TODO: Backend'e gönder (örnek fetch)
-        // fetch('/api/kvkk-consent', { ... })
+        // 
     }
 
-    if (!conversation) {
-        return <div className="chat-window">Bir sohbet seçin</div>;
-    }
 
-    // KVKK bannerı (modal yerine üstte sabit kutu)
-    if (!kvkkChoice) {
-        return (
-            <div className="chat-window" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#1e1e1e', color: 'white', padding: '16px' }}>
-                <div className="kvkk-banner" style={{
-                    background: '#23262b',
-                    color: '#fff',
-                    borderRadius: 10,
-                    padding: '18px 20px',
-                    marginBottom: 18,
-                    boxShadow: '0 2px 12px -4px #000',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    maxWidth: 480,
-                    alignSelf: 'center',
-                    fontSize: 15
-                }}>
-                    <div style={{ marginBottom: 10, textAlign: 'center' }}>
-                        <b>KVKK Onayı</b><br />
-                        Kişisel verileriniz 6698 sayılı KVKK kapsamında korunmaktadır. Detaylı bilgi için
-                        <a href="/kvkk.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#26aca3', textDecoration: 'underline', marginLeft: 4 }}>
-                            KVKK Aydınlatma Metni (PDF)
-                        </a>
-                        'ni inceleyebilirsiniz.
-                    </div>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        <button style={{ background: '#26aca3', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleKvkkChoice('accept')}>Kabul Ediyorum</button>
-                        <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleKvkkChoice('reject')}>Reddediyorum</button>
-                        <button style={{ background: '#23262b', color: '#26aca3', border: '1px solid #26aca3', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => window.open('/kvkk.pdf', '_blank')}>Daha Fazla Bilgi</button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-    if (kvkkChoice === 'reject') {
-        return (
-            <div className="chat-window" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#fff', background: '#1e1e1e' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <h3>KVKK Onayı Gerekli</h3>
-                    <p>Sohbete devam edebilmek için KVKK onayınız gereklidir.</p>
-                </div>
-            </div>
-        );
-    }
+    const messagesWithKvkk = [...oldMessages, ...conversation.messages];
 
-    // KVKK mesajı (ilk mesaj olarak)
-    const kvkkMessage = {
-        sender: "Sistem",
-        text: (
-            <span>
-                Kişisel verileriniz 6698 sayılı KVKK kapsamında korunmaktadır. Detaylı bilgi için{' '}
-                <a href="/kvkk.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#26aca3', textDecoration: 'underline' }}>
-                    KVKK Aydınlatma Metni (PDF)
-                </a>
-                .
-            </span>
-        ),
-        type: "kvkk"
-    };
-    // Mesajlar dizisinin başına KVKK mesajı ekle (sadece ilk mesajda)
-    const messagesWithKvkk = [kvkkMessage, ...conversation.messages];
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messagesWithKvkk.length]);
 
     const handleReport = () => {
         if (reportReason) {
@@ -113,15 +120,38 @@ function ChatWindow({ conversation }) {
         }
     };
 
-    const handleSaveNote = () => {
-        setSavedNote(note);
-        setNote("");
+    const handleEndChatConfirmed = () => {
+        if (conversation && conversation.id) {
+            onEndChat(conversation.id);
+            setShowEndChatModal(false);
+            setShowEndEndedModal(true);
+        }
     };
 
-    const handleDeleteNote = () => {
-        setSavedNote("");
-        setNote("");
+    const handleEndEndedModalClose = () => {
+        setShowEndEndedModal(false);
+        setStatus('Yanıtlandı');
+        // 
     };
+
+    // uyarı kutusu
+    const warningBoxStyle = {
+        background: '#23262b',
+        borderRadius: 5,
+        padding: '18px 16px',
+        marginTop: 16,
+        marginBottom: 0,
+        boxShadow: '0 2px 12px -4px #000',
+        textAlign: 'center',
+        color: '#d64e4e',
+        fontWeight: 600,
+        fontSize: 15
+    };
+
+    // Koşullu 
+    if (!conversation) {
+        return <div className="chat-window">Bir sohbet seçin</div>;
+    }
 
     return (
         <div className="chat-window" style={{
@@ -131,6 +161,8 @@ function ChatWindow({ conversation }) {
             backgroundColor: '#1e1e1e',
             color: 'white',
             padding: '16px',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
         }}>
             {/* Üst Başlık */}
             <div style={{
@@ -146,6 +178,7 @@ function ChatWindow({ conversation }) {
                 <span>{conversation.name}</span>
                 {/* Durum etiketi ve ikon */}
                 <span
+                    className="status-badge"
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -189,7 +222,7 @@ function ChatWindow({ conversation }) {
                                     style={{
                                         padding: '4px 8px',
                                         cursor: 'pointer',
-                                        background: status === opt ? '#26aca3' : 'transparent',
+                                        background: status === opt ? '#275db5' : 'transparent',
                                         color: status === opt ? '#fff' : '#eee',
                                         borderRadius: 6,
                                         marginBottom: 2,
@@ -205,26 +238,32 @@ function ChatWindow({ conversation }) {
                         </div>
                     )}
                 </span>
-                {/* KVKK PDF linki */}
-                <a
-                    href="/kvkk.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                        color: "#26aca3",
-                        fontWeight: "bold",
-                        marginLeft: 12,
-                        fontSize: 14,
-                        textDecoration: "underline"
-                    }}
-                >
-                    KVKK Aydınlatma Metni (PDF)
-                </a>
-                <FiAlertCircle style={{ color: '#ffb300', cursor: 'pointer', fontSize: '18px', marginLeft: 8 }} title="Kullanıcıyı bildir" onClick={() => setShowReportModal(true)} />
+                {/* Aksiyonlar kısmı: Sohbeti Bitir, Bildir */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 12 }}>
+                    <button
+                        onClick={() => setShowEndChatModal(true)}
+                        style={{
+                            background: 'none',
+                            border: '1px solid #d64e4e',
+                            color: '#d64e4e',
+                            borderRadius: 6,
+                            padding: '4px 12px',
+                            fontWeight: 500,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            height: 32
+                        }}
+                    >
+                        Sohbeti Bitir
+                    </button>
+                    <FiAlertCircle style={{ color: '#ffb300', cursor: 'pointer', fontSize: '18px' }} title="Kullanıcıyı bildir" onClick={() => setShowReportModal(true)} />
+                </div>
             </div>
 
             {showReportModal && (
-                <div style={{
+                <div className="modal-overlay" style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -257,84 +296,263 @@ function ChatWindow({ conversation }) {
                 </div>
             )}
 
+            {showEndChatModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000
+                }}>
+                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 320, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
+                        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbeti bitirmek istediğinize emin misiniz?</div>
+                        <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleEndChatConfirmed}>Evet, Bitir</button>
+                        <button style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowEndChatModal(false)}>Vazgeç</button>
+                    </div>
+                </div>
+            )}
+
+            {status === 'Kapatıldı' && showEndEndedModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 3000
+                }}>
+                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 320, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
+                        <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Sohbet Sonlandırıldı</div>
+                        <div style={{ fontSize: 15, fontWeight: 400, marginBottom: 18 }}>Bu sohbet kapatıldı, yeni mesaj gönderilemez.</div>
+                        <button style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={handleEndEndedModalClose}>Tamam</button>
+                    </div>
+                </div>
+            )}
+
             {/* Mesajlar */}
-            <div style={{
+            <div className="messages-area" style={{
                 flex: 1,
                 overflowY: 'auto',
+                minHeight: 0,
                 paddingRight: 10,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
+                marginBottom: 0
             }}>
-                {messagesWithKvkk.map((msg, idx) => (
-                    <div
-                        key={idx}
-                        className={msg.type === "kvkk" ? "kvkk-message" : ""}
-                        style={msg.type === "kvkk"
-                            ? {
-                                background: '#eafaf7',
-                                color: '#222',
-                                borderLeft: '4px solid #26aca3',
-                                padding: '10px 16px',
-                                borderRadius: 8,
-                                marginBottom: 10,
-                                fontSize: 14,
-                                alignSelf: 'center',
-                                maxWidth: '80%'
-                            }
-                            : {
-                                alignSelf: msg.sender === "Siz" ? 'flex-end' : 'flex-start',
-                                backgroundColor: msg.sender === "Siz" ? '#26aca3' : '#333',
-                                padding: '10px 14px',
-                                borderRadius: msg.sender === "Siz"
-                                    ? '16px 16px 0px 16px'
-                                    : '16px 16px 16px 0px',
-                                maxWidth: '60%',
-                                color: '#fff',
-                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                                position: 'relative',
-                                fontSize: 15,
-                            }}
-                    >
-                        <div>{msg.text}</div>
-                        {msg.type !== "kvkk" && (
-                            <div style={{
-                                fontSize: "11px",
-                                color: "#ccc",
-                                marginTop: "6px",
-                                textAlign: msg.sender === "Siz" ? "right" : "left"
-                            }}>
-                                {formatTime(msg.timestamp || new Date())}
+                {/* KVKK mesajı ve Mesajları Yükle butonu */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
+                    {!allOldLoaded && (
+                        oldLoading ? (
+                            <div style={{ marginTop: 8, color: '#275db5', fontWeight: 600, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className="spinner" style={{ width: 18, height: 18, border: '3px solid #275db5', borderTop: '3px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                                Yükleniyor...
                             </div>
-                        )}
-                    </div>
-                ))}
+                        ) : (
+                            <button
+                                style={{
+                                    marginTop: 8,
+                                    background: '#23262b',
+                                    color: '#fff',
+                                    border: '1px solid #275db5',
+                                    borderRadius: 6,
+                                    padding: '6px 18px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    fontSize: 14
+                                }}
+                                onClick={() => {
+                                    setOldLoading(true);
+                                    setTimeout(() => {
+                                        const nextBatch = allFakeOldMessages.slice(
+                                            oldBatch * OLD_MESSAGES_BATCH_SIZE,
+                                            (oldBatch + 1) * OLD_MESSAGES_BATCH_SIZE
+                                        );
+                                        setOldMessages(prev => [...nextBatch, ...prev]);
+                                        setOldBatch(prev => prev + 1);
+                                        setOldLoading(false);
+                                    }, 900); // 900ms loading simülasyonu
+                                }}
+                            >
+                                Mesajları Yükle
+                            </button>
+                        )
+                    )}
+                </div>
+                {/* Diğer mesajlar */}
+                {messagesWithKvkk.slice(1).map((msg, idx) => {
+                    const isAgent = msg.sender === "Siz";
+                    const isSystem = msg.sender === "Sistem";
+                    // Platforma göre balon rengi belirle (gradient)
+                    let bubbleBg = isAgent ? '#23262b' : '#23262b';
+                    let bubbleColor = '#fff';
+                    if (!isAgent && !isSystem) {
+                        switch (conversation.platform) {
+                            case 'whatsapp':
+                                bubbleBg = 'linear-gradient(135deg, #25d366 0%, #128c7e 100%)';
+                                bubbleColor = '#23262b';
+                                break;
+                            case 'facebook':
+                                bubbleBg = 'linear-gradient(135deg, #0084ff 0%, #00c6ff 100%)';
+                                bubbleColor = '#fff';
+                                break;
+                            case 'email':
+                                bubbleBg = 'linear-gradient(135deg, #ffb300 0%,rgb(160, 131, 45) 100%)';
+                                bubbleColor = '#23262b';
+                                break;
+                            case 'web':
+                                bubbleBg = 'linear-gradient(135deg, #275db5 0%, #4f8cff 100%)';
+                                bubbleColor = '#fff';
+                                break;
+                            default:
+                                bubbleBg = '#23262b';
+                                bubbleColor = '#fff';
+                        }
+                    } else if (isAgent) {
+                        bubbleBg = 'linear-gradient(135deg, #23262b 0%, #48494b 100%)';
+                        bubbleColor = '#fff';
+                    } else if (isSystem) {
+                        bubbleBg = '#eafaf7';
+                        bubbleColor = '#222';
+                    }
+                    return (
+                        <div key={idx} style={{
+                            display: 'flex',
+                            flexDirection: isAgent ? 'row-reverse' : 'row',
+                            alignItems: 'flex-end',
+                            marginBottom: 10,
+                            gap: 8,
+                        }}>
+                            {/* */}
+                            {!isSystem && (
+                                isAgent ? (
+                                    <span style={{ width: 30, height: 30, borderRadius: '50%', background: '#275db5', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, border: '1.5px solid #eee' }}>
+                                        <FiUser />
+                                    </span>
+                                ) : (
+                                    conversation.avatar ? (
+                                        <img src={conversation.avatar} alt={conversation.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #eee', background: '#23262b' }} />
+                                    ) : (
+                                        <span style={{ width: 30, height: 30, borderRadius: '50%', background: '#23262b', color: '#aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, border: '1.5px solid #eee' }}>
+                                            <FiUser />
+                                        </span>
+                                    )
+                                )
+                            )}
+                            <div
+                                className="message-bubble"
+                                style={{
+                                    background: bubbleBg,
+                                    color: bubbleColor,
+                                    borderRadius: isAgent ? '18px 18px 6px 18px' : '18px 18px 18px 6px',
+                                    padding: '10px 16px',
+                                    fontSize: 15,
+                                    maxWidth: '70%',
+                                    minWidth: 48,
+                                    boxShadow: '0 2px 8px -4px #000',
+                                    alignSelf: isAgent ? 'flex-end' : 'flex-start',
+                                    border: isAgent ? '1px solid #444' : 'none',
+                                    wordBreak: 'break-word',
+                                    position: 'relative',
+                                    transition: 'background 0.2s',
+                                }}
+                            >
+                                <span style={{ flex: 1 }}>{msg.text}</span>
+                                <span style={{ fontSize: 11, color: isAgent ? '#bbb' : '#23262b99', marginLeft: 8, marginRight: 0, float: 'right', verticalAlign: 'bottom' }}>{msg.timestamp ? formatTime(new Date(msg.timestamp)) : ''}</span>
+                            </div>
+                        </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Mesaj yazma alanı */}
-            <div style={{ display: 'flex', marginTop: 12 }}>
-                <input
-                    type="text"
-                    placeholder="Mesajınızı yazın..."
-                    style={{
-                        flex: 1,
-                        padding: 10,
-                        borderRadius: '6px 0 0 6px',
-                        border: 'none',
-                        outline: 'none',
-                    }}
-                />
-                <button style={{
-                    padding: '10px 16px',
-                    backgroundColor: '#26aca3',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0 6px 6px 0',
-                    cursor: 'pointer',
+            {status === 'Kapatıldı' ? (
+                <div style={{
+                    background: '#23262b',
+                    borderRadius: 5,
+                    padding: '18px 16px',
+                    marginTop: 0,
+                    marginBottom: 0,
+                    boxShadow: '0 2px 12px -4px #000',
+                    textAlign: 'center',
+                    color: '#d64e4e',
+                    fontWeight: 600,
+                    fontSize: 15
                 }}>
-                    Gönder
-                </button>
-            </div>
+                    Bu sohbet kapatıldı, yeni mesaj gönderilemez.
+                </div>
+            ) : status === 'Yönlendirildi' ? (
+                <div style={{
+                    background: '#23262b',
+                    borderRadius: 5,
+                    padding: '18px 16px',
+                    marginTop: 0,
+                    marginBottom: 0,
+                    boxShadow: '0 2px 12px -4px #000',
+                    textAlign: 'center',
+                    color: '#d64e4e',
+                    fontWeight: 600,
+                    fontSize: 15
+                }}>
+                    Bu sohbet başka bir temsilciye yönlendirildi, yeni mesaj gönderilemez.
+                </div>
+            ) : (
+                <div style={{
+                    background: '#23262b',
+                    borderRadius: 5,
+                    padding: '16px 16px 12px 16px',
+                    marginTop: 0,
+                    marginBottom: 0,
+                    boxShadow: '0 2px 12px -4px #000',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    gap: 8
+                }}>
+                    <textarea
+                        className="textarea-focus"
+                        placeholder="Mesajınızı yazın..."
+                        rows={2}
+                        style={{
+                            flex: 1,
+                            minHeight: 50,
+                            maxHeight: 120,
+                            resize: 'vertical',
+                            border: 'none',
+                            outline: 'none',
+                            borderRadius: 5,
+                            padding: 10,
+                            background: '#181818',
+                            color: '#fff',
+                            fontSize: 15
+                        }}
+                    />
+                    <button
+                        className="button-hover"
+                        style={{
+                            background: '#275db5',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 5,
+                            padding: '10px 20px',
+                            fontWeight: 600,
+                            fontSize: 16,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Gönder
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

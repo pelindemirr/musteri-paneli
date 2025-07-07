@@ -43,3 +43,327 @@
 .read-the-docs {
   color: #888;
 }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sidebar buton animasyonları */
+.menu-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+  opacity: 0.8;
+}
+
+.menu-button:hover {
+  transform: translateX(4px);
+  opacity: 1;
+  background-color: #275db5 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(39, 93, 181, 0.3);
+}
+
+.menu-button.active {
+  transform: translateX(8px);
+  opacity: 1;
+  background-color: #275db5 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(39, 93, 181, 0.4);
+}
+
+.menu-button:active {
+  transform: translateX(6px) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+/* Sohbet listesi geçiş animasyonları */
+.chatlist-panel {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chat list item hover animasyonu */
+.chatlist-item {
+  transition: all 0.2s ease;
+}
+
+.chatlist-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Mesaj baloncukları için fade-in animasyonu */
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-bubble {
+  animation: messageFadeIn 0.3s ease-out;
+}
+
+/* Sohbet değişimi için slide animasyonu */
+@keyframes chatSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.chat-window {
+  animation: chatSlideIn 0.4s ease-out;
+}
+
+/* Loading pulse animasyonu */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.01);
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Status badge animasyonu */
+@keyframes statusGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(39, 93, 181, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(39, 93, 181, 0.6);
+  }
+}
+
+.status-badge {
+  animation: statusGlow 2s ease-in-out infinite;
+}
+
+/* Favori yıldız animasyonu */
+@keyframes starBounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.favorite-star:hover {
+  animation: starBounce 0.6s ease-in-out;
+}
+
+/* Modal fade-in animasyonu */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-overlay {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+/* Textarea focus animasyonu */
+.textarea-focus {
+  transition: all 0.3s ease;
+}
+
+.textarea-focus:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px rgba(39, 93, 181, 0.3);
+}
+
+/* Button hover scale efekti */
+.button-hover {
+  transition: all 0.2s ease;
+}
+
+.button-hover:hover {
+  transform: scale(1.05);
+}
+
+.button-hover:active {
+  transform: scale(0.95);
+}
+
+/* Progress bar animasyonu */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.progress-bar {
+  animation: progressFill 2s ease-out;
+}
+
+/* Notification popup animasyonu */
+@keyframes notificationSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.notification {
+  animation: notificationSlide 0.4s ease-out;
+}
+
+/* ChatWindow paneli geçiş animasyonu */
+.chat-fade-enter {
+  opacity: 0;
+  transform: translateX(40px) scale(0.98);
+  z-index: 1;
+}
+
+.chat-fade-enter-active {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.chat-fade-exit {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  z-index: 0;
+}
+
+.chat-fade-exit-active {
+  opacity: 0;
+  transform: translateX(-40px) scale(0.98);
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  min-height: 0;
+}
+
+.main-content {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100vh;
+}
+
+.chatwindow-panel {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  max-height: 100vh;
+  background: #1e1e1e;
+}
+
+.messages-area {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  /* Firefox */
+}
+
+.messages-area::-webkit-scrollbar {
+  width: 8px;
+  background: #23262b;
+}
+
+.messages-area::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.sidebar-accordion-content {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s, box-shadow 0.3s, background 0.3s, transform 0.3s, padding 0.3s, margin 0.3s;
+  max-height: 500px;
+  opacity: 1;
+  background: #23262b;
+  box-shadow: 0 4px 16px -8px #0002;
+  border-radius: 8px;
+  margin: 8px 0 12px 0;
+  padding: 12px 16px;
+  transform: translateY(0);
+}
+
+.sidebar-accordion-content.closed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0 16px;
+  margin: 0;
+  box-shadow: none;
+  transform: translateY(16px) scale(0.98);
+}
+
+.menu-title .chevron {
+  transition: transform 0.3s;
+  display: flex;
+  align-items: center;
+}
+
+.menu-title.open .chevron {
+  transform: rotate(180deg);
+}

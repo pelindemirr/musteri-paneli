@@ -18,7 +18,7 @@ const readyMessages2 = [
 ];
 const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"];
 
-function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId }) {
+function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId, onShowHistory }) {
     const [note, setNote] = useState("");
     const [savedNote, setSavedNote] = useState("");
     const [noteOpen, setNoteOpen] = useState(true);
@@ -29,6 +29,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
     const [showReadyMessages1, setShowReadyMessages1] = useState(false);
     const [showReadyMessages2, setShowReadyMessages2] = useState(false);
     const [info, setInfo] = useState("");
+    const [showMakroMenu, setShowMakroMenu] = useState(false);
 
     const handleSaveNote = () => {
         setSavedNote(note);
@@ -79,13 +80,15 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     </div>
                 </div>
                 <div style={{ marginTop: 18, marginBottom: 8, fontSize: 15 }}>
+                    <div><strong>id:</strong> {customer.id}</div>
+                    <div><strong>Müşteri No:</strong> {customer.customerNo}</div>
                     <div><strong>Telefon:</strong> {customer.phone}</div>
                     <div><strong>Adres:</strong> {customer.address}</div>
                     <div><strong>E-posta:</strong> {customer.email}</div>
                 </div>
             </div>
             {/* Özel Not Alanı */}
-            <div style={{ background: '#23262b', borderRadius: 8, padding: 10, marginBottom: 10, marginTop: 8, position: 'relative' }}>
+            <div style={{ background: '#23262b', borderRadius: 8, padding: 8, marginBottom: 8, marginTop: 8, position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: noteOpen ? 4 : 0 }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb300', fontSize: 14 }}>Özel Not</div>
                     <button onClick={() => setNoteOpen(!noteOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffb300', fontSize: 18, padding: 0 }}>
@@ -98,7 +101,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                             value={note}
                             onChange={e => setNote(e.target.value)}
                             placeholder="Bu müşteriyle ilgili özel notunuzu yazın..."
-                            style={{ width: '100%', minHeight: 36, borderRadius: 6, border: '1px solid #444', background: '#181818', color: '#fff', padding: 6, fontSize: 13, resize: 'vertical', marginBottom: 4 }}
+                            style={{ width: '100%', minHeight: 40, borderRadius: 6, border: '1px solid #444', background: '#181818', color: '#fff', padding: '8px 10px', fontSize: 13, resize: 'vertical', marginBottom: 4, boxSizing: 'border-box' }}
                         />
                         <button
                             onClick={handleSaveNote}
@@ -117,19 +120,60 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
             </div>
             <div className="customer-actions">
                 <div className="actions-title">Aksiyonlar</div>
-                <button className="action-btn" onClick={() => setShowManagerModal(true)}>Mesajları yöneticiye aktar <span>+</span></button>
-                <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span>+</span></button>
-                <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span>+</span></button>
-                <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span>+</span></button>
+
+                {/* Makrolar butonu ve açılır menü */}
+                <div style={{ position: 'relative', marginBottom: 8 }}>
+                    <button className="action-btn" onClick={() => setShowMakroMenu(v => !v)}>
+                        Makrolar <span style={{ color: '#275db5' }}>+</span>
+                    </button>
+                    {typeof showMakroMenu === 'undefined' ? null : showMakroMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 38,
+                            left: 0,
+                            background: '#23262b',
+                            border: '1px solid #444',
+                            borderRadius: 8,
+                            zIndex: 10,
+                            minWidth: 160,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            fontSize: 15,
+                            padding: 0
+                        }}>
+                            <a
+                                href="/kvkk.pdf"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    display: 'block',
+                                    padding: '10px 18px',
+                                    color: '#fff',
+                                    textDecoration: 'none',
+                                    borderBottom: '1px solid #444',
+                                    borderRadius: '8px 8px 0 0',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => setShowMakroMenu(false)}
+                            >
+                                KVKK Metni
+                            </a>
+                            {/* Diğer makro seçenekleri buraya eklenebilir */}
+                        </div>
+                    )}
+                </div>
+                <button className="action-btn" onClick={() => setShowManagerModal(true)}>Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span></button>
+                <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
+                <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
+                <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
                 {/* Info mesajı */}
-                {info && <div style={{ marginTop: 10, color: '#26aca3', fontWeight: 500, textAlign: 'center' }}>{info}</div>}
+                {info && <div style={{ marginTop: 10, color: '#275db5', fontWeight: 500, textAlign: 'center' }}>{info}</div>}
             </div>
             {/* Yöneticiye aktar modalı */}
             {showManagerModal && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 320, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
                         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Mesajı yöneticiye aktarmak istediğinize emin misiniz?</div>
-                        <button style={{ background: '#26aca3', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleManagerTransfer}>Evet, Aktar</button>
+                        <button style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleManagerTransfer}>Evet, Aktar</button>
                         <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowManagerModal(false)}>Vazgeç</button>
                     </div>
                 </div>
@@ -143,7 +187,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                             {agents.map(agent => <option key={agent} value={agent}>{agent}</option>)}
                         </select>
                         <br />
-                        <button style={{ background: '#26aca3', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleAgentTransfer}>Aktar</button>
+                        <button style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleAgentTransfer}>Aktar</button>
                         <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowAgentModal(false)}>Vazgeç</button>
                     </div>
                 </div>
@@ -154,7 +198,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 24, minWidth: 280, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
                         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Hazır Mesajlar</div>
                         {readyMessages1.map(msg => (
-                            <div key={msg} style={{ margin: '8px 0', padding: 8, background: '#181818', borderRadius: 6, cursor: 'pointer', color: '#26aca3', fontWeight: 500 }} onClick={() => handleReadyMessage1(msg)}>{msg}</div>
+                            <div key={msg} style={{ margin: '8px 0', padding: 8, background: '#181818', borderRadius: 6, cursor: 'pointer', color: '#275db5', fontWeight: 500 }} onClick={() => handleReadyMessage1(msg)}>{msg}</div>
                         ))}
                         <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', fontWeight: 600, marginTop: 10, cursor: 'pointer' }} onClick={() => setShowReadyMessages1(false)}>Kapat</button>
                     </div>
@@ -166,13 +210,13 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 24, minWidth: 280, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
                         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Hazır Mesajlar</div>
                         {readyMessages2.map(msg => (
-                            <div key={msg} style={{ margin: '8px 0', padding: 8, background: '#181818', borderRadius: 6, cursor: 'pointer', color: '#26aca3', fontWeight: 500 }} onClick={() => handleReadyMessage2(msg)}>{msg}</div>
+                            <div key={msg} style={{ margin: '8px 0', padding: 8, background: '#181818', borderRadius: 6, cursor: 'pointer', color: '#275db5', fontWeight: 500 }} onClick={() => handleReadyMessage2(msg)}>{msg}</div>
                         ))}
                         <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', fontWeight: 600, marginTop: 10, cursor: 'pointer' }} onClick={() => setShowReadyMessages2(false)}>Kapat</button>
                     </div>
                 </div>
             )}
-            {/* KVKK metni veya alanı buraya eklenmişse hemen altına buton ekle */}
+            {/* */}
 
         </div>
     );
