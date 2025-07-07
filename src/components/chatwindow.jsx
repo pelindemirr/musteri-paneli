@@ -42,9 +42,9 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     const [editStatus, setEditStatus] = useState(false);
     const [showEndChatModal, setShowEndChatModal] = useState(false);
     const [showEndEndedModal, setShowEndEndedModal] = useState(false);
-    const [oldLoading, setOldLoading] = useState(false);
-    const [oldMessages, setOldMessages] = useState([]);
-    const [oldBatch, setOldBatch] = useState(0);
+    const [oldMessagesMap, setOldMessagesMap] = useState({});
+    const [oldBatchMap, setOldBatchMap] = useState({});
+    const [oldLoadingMap, setOldLoadingMap] = useState({});
     const messagesEndRef = useRef(null);
 
     // eski mesajları görüntüleme / geçmiş sohbetler
@@ -94,7 +94,10 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     // Kaç mesaj bir seferde yüklensin?
     const OLD_MESSAGES_BATCH_SIZE = 5;
     // Şu ana kadar yüklenen eski mesajlar
-    const [allOldLoaded] = useState(oldBatch * OLD_MESSAGES_BATCH_SIZE >= allFakeOldMessages.length);
+    const oldMessages = oldMessagesMap[conversation.id] || [];
+    const oldBatch = oldBatchMap[conversation.id] || 0;
+    const oldLoading = oldLoadingMap[conversation.id] || false;
+    const allOldLoaded = oldBatch * OLD_MESSAGES_BATCH_SIZE >= allFakeOldMessages.length;
 
     // KVKK modalı
     function handleKvkkChoice(choice) {
@@ -146,6 +149,26 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
         color: '#d64e4e',
         fontWeight: 600,
         fontSize: 15
+    };
+
+    // Mesajları Yükle butonu için handler
+    const handleLoadOldMessages = () => {
+        setOldLoadingMap(prev => ({ ...prev, [conversation.id]: true }));
+        setTimeout(() => {
+            const nextBatch = allFakeOldMessages.slice(
+                oldBatch * OLD_MESSAGES_BATCH_SIZE,
+                (oldBatch + 1) * OLD_MESSAGES_BATCH_SIZE
+            );
+            setOldMessagesMap(prev => ({
+                ...prev,
+                [conversation.id]: [...nextBatch, ...(prev[conversation.id] || [])]
+            }));
+            setOldBatchMap(prev => ({
+                ...prev,
+                [conversation.id]: (prev[conversation.id] || 0) + 1
+            }));
+            setOldLoadingMap(prev => ({ ...prev, [conversation.id]: false }));
+        }, 900);
     };
 
     // Koşullu 
@@ -238,8 +261,10 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                         </div>
                     )}
                 </span>
-                {/* Aksiyonlar kısmı: Sohbeti Bitir, Bildir */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 12 }}>
+                {/* */}
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: 12, justifyContent: 'space-between', width: '100%' }}>
+                    <FiAlertCircle style={{ color: '#ffb300', cursor: 'pointer', fontSize: '18px' }} title="Kullanıcıyı bildir" onClick={() => setShowReportModal(true)} />
+                    <div style={{ flex: 1 }} />
                     <button
                         onClick={() => setShowEndChatModal(true)}
                         style={{
@@ -253,12 +278,12 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            height: 32
+                            height: 32,
+                            marginLeft: 'auto'
                         }}
                     >
                         Sohbeti Bitir
                     </button>
-                    <FiAlertCircle style={{ color: '#ffb300', cursor: 'pointer', fontSize: '18px' }} title="Kullanıcıyı bildir" onClick={() => setShowReportModal(true)} />
                 </div>
             </div>
 
@@ -370,18 +395,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                     cursor: 'pointer',
                                     fontSize: 14
                                 }}
-                                onClick={() => {
-                                    setOldLoading(true);
-                                    setTimeout(() => {
-                                        const nextBatch = allFakeOldMessages.slice(
-                                            oldBatch * OLD_MESSAGES_BATCH_SIZE,
-                                            (oldBatch + 1) * OLD_MESSAGES_BATCH_SIZE
-                                        );
-                                        setOldMessages(prev => [...nextBatch, ...prev]);
-                                        setOldBatch(prev => prev + 1);
-                                        setOldLoading(false);
-                                    }, 900); // 900ms loading simülasyonu
-                                }}
+                                onClick={handleLoadOldMessages}
                             >
                                 Mesajları Yükle
                             </button>
@@ -454,7 +468,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                     background: bubbleBg,
                                     color: bubbleColor,
                                     borderRadius: isAgent ? '18px 18px 6px 18px' : '18px 18px 18px 6px',
-                                    padding: '10px 16px',
+                                    padding: '10px 16px 22px 16px',
                                     fontSize: 15,
                                     maxWidth: '70%',
                                     minWidth: 48,
@@ -467,7 +481,20 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                 }}
                             >
                                 <span style={{ flex: 1 }}>{msg.text}</span>
-                                <span style={{ fontSize: 11, color: isAgent ? '#bbb' : '#23262b99', marginLeft: 8, marginRight: 0, float: 'right', verticalAlign: 'bottom' }}>{msg.timestamp ? formatTime(new Date(msg.timestamp)) : ''}</span>
+                                {msg.timestamp && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        bottom: 6,
+                                        right: 12,
+                                        fontSize: 11,
+                                        color: isAgent ? '#bbb' : '#23262b99',
+                                        marginLeft: 8,
+                                        marginRight: 0,
+                                        verticalAlign: 'bottom',
+                                        background: 'transparent',
+                                        padding: 0
+                                    }}>{formatTime(new Date(msg.timestamp))}</span>
+                                )}
                             </div>
                         </div>
                     );
@@ -479,7 +506,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
             {status === 'Kapatıldı' ? (
                 <div style={{
                     background: '#23262b',
-                    borderRadius: 5,
+                    borderRadius: 8,
                     padding: '18px 16px',
                     marginTop: 0,
                     marginBottom: 0,
@@ -494,7 +521,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
             ) : status === 'Yönlendirildi' ? (
                 <div style={{
                     background: '#23262b',
-                    borderRadius: 5,
+                    borderRadius: 8,
                     padding: '18px 16px',
                     marginTop: 0,
                     marginBottom: 0,

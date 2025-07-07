@@ -16,7 +16,10 @@ const readyMessages2 = [
     "Görüşmek üzere!",
     "Başka bir konuda yardımcı olabilir miyim?"
 ];
-const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"];
+// Yöneticiler
+const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
+// Ekip arkadaşları (yöneticiler hariç)
+const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
 
 function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId, onShowHistory }) {
     const [note, setNote] = useState("");
@@ -79,52 +82,28 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                         <div className="customer-info">{customer.info}</div>
                     </div>
                 </div>
-                <div style={{ marginTop: 18, marginBottom: 8, fontSize: 15 }}>
+                <div style={{ marginTop: 18, marginBottom: 8, fontSize: 13 }}>
                     <div><strong>id:</strong> {customer.id}</div>
                     <div><strong>Müşteri No:</strong> {customer.customerNo}</div>
                     <div><strong>Telefon:</strong> {customer.phone}</div>
                     <div><strong>Adres:</strong> {customer.address}</div>
                     <div><strong>E-posta:</strong> {customer.email}</div>
+                    <div><strong>Geçmiş Konuşma Konusu:</strong> {customer.subject ? customer.subject : 'Yok'}</div>
                 </div>
             </div>
-            {/* Özel Not Alanı */}
-            <div style={{ background: '#23262b', borderRadius: 8, padding: 8, marginBottom: 8, marginTop: 8, position: 'relative' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: noteOpen ? 4 : 0 }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb300', fontSize: 14 }}>Özel Not</div>
-                    <button onClick={() => setNoteOpen(!noteOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffb300', fontSize: 18, padding: 0 }}>
-                        {noteOpen ? <FiChevronUp /> : <FiChevronDown />}
-                    </button>
-                </div>
-                {noteOpen && (
-                    <>
-                        <textarea
-                            value={note}
-                            onChange={e => setNote(e.target.value)}
-                            placeholder="Bu müşteriyle ilgili özel notunuzu yazın..."
-                            style={{ width: '100%', minHeight: 40, borderRadius: 6, border: '1px solid #444', background: '#181818', color: '#fff', padding: '8px 10px', fontSize: 13, resize: 'vertical', marginBottom: 4, boxSizing: 'border-box' }}
-                        />
-                        <button
-                            onClick={handleSaveNote}
-                            style={{ background: '#ffb300', color: '#23262b', border: 'none', borderRadius: 6, padding: '4px 14px', fontWeight: 'bold', fontSize: 13, cursor: 'pointer' }}
-                        >Kaydet</button>
-                        {savedNote && (
-                            <div style={{ marginTop: 8, color: '#fff', fontSize: 13, background: '#181818', borderRadius: 6, padding: 6, border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <span><span style={{ color: '#ffb300', fontWeight: 'bold' }}>Notunuz:</span> {savedNote}</span>
-                                <button onClick={handleDeleteNote} title="Notu Sil" style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: 16, marginLeft: 8 }}>
-                                    <FiTrash2 />
-                                </button>
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
+            {/* Aksiyonlar */}
             <div className="customer-actions">
                 <div className="actions-title">Aksiyonlar</div>
 
                 {/* Makrolar butonu ve açılır menü */}
                 <div style={{ position: 'relative', marginBottom: 8 }}>
-                    <button className="action-btn" onClick={() => setShowMakroMenu(v => !v)}>
-                        Makrolar <span style={{ color: '#275db5' }}>+</span>
+                    <button
+                        className="action-btn"
+                        style={{ width: '100%', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 16, paddingRight: 16, fontSize: 15, fontWeight: 500 }}
+                        onClick={() => setShowMakroMenu(v => !v)}
+                    >
+                        <span style={{ flex: 1, textAlign: 'left', fontSize: 15, fontWeight: 500 }}>Makrolar</span>
+                        <span style={{ fontSize: 15, fontWeight: 500, color: '#275db5', marginLeft: 8 }}>+</span>
                     </button>
                     {typeof showMakroMenu === 'undefined' ? null : showMakroMenu && (
                         <div style={{
@@ -138,7 +117,8 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                             minWidth: 160,
                             boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                             fontSize: 15,
-                            padding: 0
+                            padding: 0,
+                            width: '100%'
                         }}>
                             <a
                                 href="/kvkk.pdf"
@@ -157,7 +137,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                             >
                                 KVKK Metni
                             </a>
-                            {/* Diğer makro seçenekleri buraya eklenebilir */}
+                            {/*  */}
                         </div>
                     )}
                 </div>
@@ -216,8 +196,38 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     </div>
                 </div>
             )}
-            {/* */}
-
+            {/*  */}
+            <div style={{ background: '#23262b', borderRadius: 8, padding: 8, marginBottom: 8, marginTop: 16, position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: noteOpen ? 4 : 0 }}>
+                    <div style={{ fontWeight: 'bold', color: '#ffb300', fontSize: 14 }}>Genel Not</div>
+                    <button onClick={() => setNoteOpen(!noteOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffb300', fontSize: 18, padding: 0 }}>
+                        {noteOpen ? <FiChevronUp /> : <FiChevronDown />}
+                    </button>
+                </div>
+                <div style={{ color: '#bbb', fontSize: 12, marginBottom: 6 }}></div>
+                {noteOpen && (
+                    <>
+                        <textarea
+                            value={note}
+                            onChange={e => setNote(e.target.value)}
+                            placeholder="Bu müşteriyle ilgili genel notunuzu yazın..."
+                            style={{ width: '100%', minHeight: 40, borderRadius: 6, border: '1px solid #444', background: '#181818', color: '#fff', padding: '8px 10px', fontSize: 13, resize: 'vertical', marginBottom: 4, boxSizing: 'border-box' }}
+                        />
+                        <button
+                            onClick={handleSaveNote}
+                            style={{ background: '#ffb300', color: '#23262b', border: 'none', borderRadius: 6, padding: '4px 14px', fontWeight: 'bold', fontSize: 13, cursor: 'pointer' }}
+                        >Kaydet</button>
+                        {savedNote && (
+                            <div style={{ marginTop: 8, color: '#fff', fontSize: 13, background: '#181818', borderRadius: 6, padding: 6, border: '1px solid #444', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span><span style={{ color: '#ffb300', fontWeight: 'bold' }}>Notunuz:</span> {savedNote}</span>
+                                <button onClick={handleDeleteNote} title="Notu Sil" style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: 16, marginLeft: 8 }}>
+                                    <FiTrash2 />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 }

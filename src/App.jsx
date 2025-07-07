@@ -25,10 +25,17 @@ const dummyConversations = [
     email: "emre@example.com",
     status: "Bekliyor",
     messages: withTimestamps([
-      { sender: "Emre", text: "Merhaba!" },
-      { sender: "Siz", text: "Size nasıl yardımcı olabilirim?" },
-      { sender: "Emre", text: "Faturamı bulamıyorum." },
-      { sender: "Siz", text: "Hemen yardımcı oluyorum." },
+      { sender: "Emre", text: "Geçen ay aldığım internet paketiyle ilgiliydi sanırım." },
+      { sender: "Siz", text: "Anladım. Sistemden kontrol ediyorum... Lütfen birkaç saniye bekleyin." },
+      { sender: "Siz", text: "Evet, 12 Haziran tarihinde alınan bir internet paketi gözüküyor. PDF fatura olarak mı iletmemi istersiniz, yoksa e-posta adresinize mi göndereyim?" },
+      { sender: "Emre", text: "E-postama gönderebilir misiniz lütfen?" },
+      { sender: "Siz", text: "Tabii ki. Sistemimizde kayıtlı e-posta adresiniz emre.karaca@example.com. Doğru mudur?" },
+      { sender: "Emre", text: "Evet, doğru." },
+      { sender: "Siz", text: "Harika! Faturanızı şu anda gönderiyorum... Gönderildi. Gelen kutunuzu ve spam klasörünü kontrol etmeyi unutmayın." },
+      { sender: "Emre", text: "Geldi, çok teşekkür ederim." },
+      { sender: "Siz", text: "Rica ederim Emre Bey. Başka bir konuda yardımcı olabilir miyim?" },
+      { sender: "Emre", text: "Hayır, şimdilik yeterli. İyi çalışmalar." },
+      { sender: "Siz", text: "Size de iyi günler dilerim. Her zaman buradayız!" }
     ]),
   },
   {

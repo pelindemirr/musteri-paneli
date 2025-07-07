@@ -154,25 +154,22 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                                     )}
                                 </div>
                                 <strong style={{ color: conv.id === selectedId ? '#fff' : '#f3f3f3', fontSize: 15 }}>{conv.name}</strong>
-                                <span style={{ fontWeight: 'normal', color: '#bbb', fontSize: 12, marginLeft: 6 }}>{totalMin}:{totalS}</span>
                             </div>
-                            <span
-                                onClick={e => { e.stopPropagation(); onToggleFavorite(conv.id); }}
-                                style={{
-                                    marginLeft: 8,
-                                    cursor: 'pointer',
-                                    fontSize: 18,
-                                    color: conv.isFavorite ? '#ffb300' : '#888',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    userSelect: 'none'
-                                }}
-                                title={conv.isFavorite ? 'Favorilerden çıkar' : 'Favorilere ekle'}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill={conv.isFavorite ? '#ffb300' : 'none'} stroke={conv.isFavorite ? '#ffb300' : '#888'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polygon points="10,2 12.59,7.36 18.51,8.09 14,12.26 15.18,18.09 10,15.1 4.82,18.09 6,12.26 1.49,8.09 7.41,7.36" />
-                                </svg>
-                            </span>
+                            {/* Küçük yeşil dot, en sağa yaslı */}
+                            <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end' }}>
+                                <span
+                                    style={{
+                                        display: 'inline-block',
+                                        width: 9,
+                                        height: 9,
+                                        borderRadius: '50%',
+                                        background: '#4caf50',
+                                        marginLeft: 16,
+                                        border: '1.5px solid #fff',
+                                        boxShadow: '0 0 0 1.5px #23262b'
+                                    }}
+                                />
+                            </div>
                         </div>
                         {/* Son Mesaj */}
                         {lastMessage && (
