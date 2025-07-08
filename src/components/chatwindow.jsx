@@ -447,7 +447,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                 bubbleColor = '#fff';
                                 break;
                             case 'email':
-                                bubbleBg = 'linear-gradient(135deg, #ffb300 0%,rgb(160, 131, 45) 100%)';
+                                bubbleBg = 'linear-gradient(135deg,rgb(230, 196, 119) 0%,rgb(160, 131, 45) 100%)';
                                 bubbleColor = '#23262b';
                                 break;
                             case 'web':
