@@ -27,6 +27,11 @@ const platformIcons = {
     default: <FiMessageCircle color='#aaa' title="Bilinmiyor" />
 };
 
+const BAR_MAX_SECONDS = parseInt(import.meta.env.VITE_BAR_MAX_SECONDS || 120, 10);
+const BAR_GREEN_SECONDS = parseInt(import.meta.env.VITE_BAR_GREEN_SECONDS || 60, 10);
+const BAR_YELLOW_SECONDS = parseInt(import.meta.env.VITE_BAR_YELLOW_SECONDS || 90, 10);
+const BAR_HEIGHT = parseInt(import.meta.env.VITE_BAR_HEIGHT || 6, 10);
+
 function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onStartChat, onEndChat }) {
     // Aktif sayaçlar için state
     const [now, setNow] = useState(Date.now());
@@ -75,23 +80,29 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                         if (lastCustomerMsgTime && (!lastAgentMsgTime || lastCustomerMsgTime > lastAgentMsgTime)) {
                             timerSec = Math.floor((now - lastCustomerMsgTime.getTime()) / 1000);
                         }
-                        timerSec = Math.max(0, Math.min(timerSec, 120));
+                        timerSec = Math.max(0, Math.min(timerSec, BAR_MAX_SECONDS));
                         // Bar rengi ve genişliği
-                        if (timerSec < 90) {
+                        if (timerSec < BAR_GREEN_SECONDS) {
                             // 0-90 sn arası yeşil
                             barColor = '#4caf50';
+                        } else if (timerSec < BAR_YELLOW_SECONDS) {
+                            // Yeşilden sarıya geçiş
+                            const t = (timerSec - BAR_GREEN_SECONDS) / (BAR_YELLOW_SECONDS - BAR_GREEN_SECONDS);
+                            // Yeşil: #4caf50 (76,175,80), Sarı: #ffb300 (255,179,0)
+                            const r = Math.round(76 + (255 - 76) * t);
+                            const g = Math.round(175 + (179 - 175) * t);
+                            const b = Math.round(80 + (0 - 80) * t);
+                            barColor = `rgb(${r},${g},${b})`;
                         } else {
-                            // 90-120 sn arası sarıdan kırmızıya geçiş
-                            // Geçiş için interpolate
-                            const t = (timerSec - 90) / 30; // 0-1 arası
-                            // Sarı: #ffb300, Kırmızı: #d32f2f
-                            // RGB: sarı (255,179,0), kırmızı (211,47,47)
+                            // Sarıdan kırmızıya geçiş
+                            const t = (timerSec - BAR_YELLOW_SECONDS) / (BAR_MAX_SECONDS - BAR_YELLOW_SECONDS);
+                            // Sarı: #ffb300 (255,179,0), Kırmızı: #d32f2f (211,47,47)
                             const r = Math.round(255 + (211 - 255) * t);
                             const g = Math.round(179 + (47 - 179) * t);
                             const b = Math.round(0 + (47 - 0) * t);
                             barColor = `rgb(${r},${g},${b})`;
                         }
-                        barWidth = Math.min((timerSec / 120) * 100, 100);
+                        barWidth = Math.min((timerSec / BAR_MAX_SECONDS) * 100, 100);
                     }
                 } else {
                     // Bekliyor veya Kapatıldı ise bar ve sayaç durur
@@ -119,7 +130,9 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                         style={{
                             padding: 12,
                             marginBottom: 8,
-                            backgroundColor: conv.id === selectedId ? "#275db5" : "#23262b",
+                            background: conv.id === selectedId
+                                ? "linear-gradient(90deg, #275db5 0%,rgb(93, 118, 165) 100%)"//aktif sohbet rengi
+                                : "#23262b",
                             color: conv.id === selectedId ? "#fff" : "#f3f3f3",
                             borderRadius: 6,
                             cursor: "pointer",
@@ -155,7 +168,7 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                                 </div>
                                 <strong style={{ color: conv.id === selectedId ? '#fff' : '#f3f3f3', fontSize: 15 }}>{conv.name}</strong>
                             </div>
-                            {/* Küçük yeşil dot, en sağa yaslı */}
+                            {/*  */}
                             <div style={{ display: 'flex', flex: 1, justifyContent: 'flex-end' }}>
                                 <span
                                     style={{
@@ -200,12 +213,11 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                             <div
                                 className="timer-bar"
                                 style={{
-                                    width: `${barWidth}%`,
+                                    height: BAR_HEIGHT,
                                     background: barColor,
-                                    height: 6,
+                                    width: `${barWidth}%`,
                                     borderRadius: 4,
-                                    transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1), background 0.7s',
-                                    minWidth: 24
+                                    transition: 'width 0.3s, background 0.3s'
                                 }}
                             />
                         </div>

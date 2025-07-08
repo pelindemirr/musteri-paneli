@@ -18,7 +18,7 @@ const readyMessages2 = [
 ];
 // Yöneticiler
 const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
-// Ekip arkadaşları (yöneticiler hariç)
+// Ekip arkadaşları 
 const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
 
 function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId, onShowHistory }) {
@@ -88,7 +88,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     <div><strong>Telefon:</strong> {customer.phone}</div>
                     <div><strong>Adres:</strong> {customer.address}</div>
                     <div><strong>E-posta:</strong> {customer.email}</div>
-                    <div><strong>Geçmiş Konuşma Konusu:</strong> {customer.subject ? customer.subject : 'Yok'}</div>
+                    <div><strong>Geçmiş Konuşma Konusu:</strong> {customer.subject ? customer.subject : 'Henüz bir konu belirtilmemiş.'}</div>
                 </div>
             </div>
             {/* Aksiyonlar */}
@@ -96,7 +96,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                 <div className="actions-title">Aksiyonlar</div>
 
                 {/* Makrolar butonu ve açılır menü */}
-                <div style={{ position: 'relative', marginBottom: 8 }}>
+                <div style={{ position: 'relative', marginBottom: 10 }}>
                     <button
                         className="action-btn"
                         style={{ width: '100%', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 16, paddingRight: 16, fontSize: 15, fontWeight: 500 }}
@@ -144,8 +144,8 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                 <button className="action-btn" onClick={() => setShowManagerModal(true)}>Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span></button>
                 <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
                 <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
-                <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
-                {/* Info mesajı */}
+                { /* <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>*/}
+                {/* Info  */}
                 {info && <div style={{ marginTop: 10, color: '#275db5', fontWeight: 500, textAlign: 'center' }}>{info}</div>}
             </div>
             {/* Yöneticiye aktar modalı */}
@@ -184,7 +184,7 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     </div>
                 </div>
             )}
-            {/* Hazır mesajlar açılır kutusu 2 */}
+            {/* Hazır mesajlar açılır kutusu 2 
             {showReadyMessages2 && (
                 <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.2)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 24, minWidth: 280, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
@@ -195,11 +195,11 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                         <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', fontWeight: 600, marginTop: 10, cursor: 'pointer' }} onClick={() => setShowReadyMessages2(false)}>Kapat</button>
                     </div>
                 </div>
-            )}
+            )}*/}
             {/*  */}
             <div style={{ background: '#23262b', borderRadius: 8, padding: 8, marginBottom: 8, marginTop: 16, position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: noteOpen ? 4 : 0 }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb300', fontSize: 14 }}>Genel Not</div>
+                    <div style={{ fontWeight: 'bold', color: '#ffb300', fontSize: 14 }}>Özel Not</div>
                     <button onClick={() => setNoteOpen(!noteOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffb300', fontSize: 18, padding: 0 }}>
                         {noteOpen ? <FiChevronUp /> : <FiChevronDown />}
                     </button>

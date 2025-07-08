@@ -38,7 +38,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     const [note, setNote] = useState("");
     const [noteOpen, setNoteOpen] = useState(true);
     const [kvkkChoice, setKvkkChoice] = useState(null);
-    const [status, setStatus] = useState(conversation.status || "Bekliyor");
+    const [status, setStatus] = useState(conversation?.status || "Bekliyor");
     const [editStatus, setEditStatus] = useState(false);
     const [showEndChatModal, setShowEndChatModal] = useState(false);
     const [showEndEndedModal, setShowEndEndedModal] = useState(false);
@@ -46,6 +46,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     const [oldBatchMap, setOldBatchMap] = useState({});
     const [oldLoadingMap, setOldLoadingMap] = useState({});
     const messagesEndRef = useRef(null);
+    const [endReason, setEndReason] = useState("");
 
     // eski mesajları görüntüleme / geçmiş sohbetler
     // Tüm eski mesajlar (örnek sahte veri)
@@ -94,9 +95,9 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     // Kaç mesaj bir seferde yüklensin?
     const OLD_MESSAGES_BATCH_SIZE = 5;
     // Şu ana kadar yüklenen eski mesajlar
-    const oldMessages = oldMessagesMap[conversation.id] || [];
-    const oldBatch = oldBatchMap[conversation.id] || 0;
-    const oldLoading = oldLoadingMap[conversation.id] || false;
+    const oldMessages = conversation ? (oldMessagesMap[conversation.id] || []) : [];
+    const oldBatch = conversation ? (oldBatchMap[conversation.id] || 0) : 0;
+    const oldLoading = conversation ? (oldLoadingMap[conversation.id] || false) : false;
     const allOldLoaded = oldBatch * OLD_MESSAGES_BATCH_SIZE >= allFakeOldMessages.length;
 
     // KVKK modalı
@@ -107,7 +108,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     }
 
 
-    const messagesWithKvkk = [...oldMessages, ...conversation.messages];
+    const messagesWithKvkk = conversation ? [...oldMessages, ...conversation.messages] : [];
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -123,8 +124,10 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
         }
     };
 
-    const handleEndChatConfirmed = () => {
+    const handleEndChatConfirmed = (reason) => {
         if (conversation && conversation.id) {
+            // Bitirme sebebi burada kullanılabilir (ör. backend'e gönderilebilir)
+            // console.log('Bitirme sebebi:', reason);
             onEndChat(conversation.id);
             setShowEndChatModal(false);
             setShowEndEndedModal(true);
@@ -279,7 +282,16 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                             display: 'inline-flex',
                             alignItems: 'center',
                             height: 32,
-                            marginLeft: 'auto'
+                            marginLeft: 'auto',
+                            transition: 'background 0.18s, color 0.18s',
+                        }}
+                        onMouseOver={e => {
+                            e.currentTarget.style.background = '#d64e4e';
+                            e.currentTarget.style.color = '#fff';
+                        }}
+                        onMouseOut={e => {
+                            e.currentTarget.style.background = 'none';
+                            e.currentTarget.style.color = '#d64e4e';
                         }}
                     >
                         Sohbeti Bitir
@@ -334,9 +346,24 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                     justifyContent: 'center',
                     zIndex: 2000
                 }}>
-                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 320, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
+                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 340, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
                         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbeti bitirmek istediğinize emin misiniz?</div>
-                        <button style={{ background: '#d64e4e', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: 'pointer' }} onClick={handleEndChatConfirmed}>Evet, Bitir</button>
+                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 14, marginTop: 8 }}>Sohbeti neden bitirmek istiyorsunuz?</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Müşterinin sorunu çözüldü' ? '#275db5' : '#232b36', color: endReason === 'Müşterinin sorunu çözüldü' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Müşterinin sorunu çözüldü' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
+                                <input type="radio" name="endReason" value="Müşterinin sorunu çözüldü" checked={endReason === 'Müşterinin sorunu çözüldü'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
+                                <span style={{ flex: 1, textAlign: 'left' }}>Müşterinin sorunu çözüldü</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Kullanıcı Sohbeti Terk etti' ? '#275db5' : '#232b36', color: endReason === 'Kullanıcı Sohbeti Terk etti' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Kullanıcı Sohbeti Terk etti' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
+                                <input type="radio" name="endReason" value="Kullanıcı Sohbeti Terk etti" checked={endReason === 'Kullanıcı Sohbeti Terk etti'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
+                                <span style={{ flex: 1, textAlign: 'left' }}>Kullanıcı Sohbeti Terk etti</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Başka durumlar' ? '#275db5' : '#232b36', color: endReason === 'Başka durumlar' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Başka durumlar' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
+                                <input type="radio" name="endReason" value="Başka durumlar" checked={endReason === 'Başka durumlar'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
+                                <span style={{ flex: 1, textAlign: 'left' }}>Başka durumlar</span>
+                            </label>
+                        </div>
+                        <button style={{ background: endReason ? '#d64e4e' : '#888', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: endReason ? 'pointer' : 'not-allowed', opacity: endReason ? 1 : 0.7, transition: 'background 0.15s' }} onClick={() => endReason && handleEndChatConfirmed(endReason)} disabled={!endReason}>Evet, Bitir</button>
                         <button style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowEndChatModal(false)}>Vazgeç</button>
                     </div>
                 </div>
@@ -374,7 +401,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                 gap: '10px',
                 marginBottom: 0
             }}>
-                {/* KVKK mesajı ve Mesajları Yükle butonu */}
+                {/*  Mesajları Yükle butonu */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
                     {!allOldLoaded && (
                         oldLoading ? (
@@ -406,8 +433,8 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                 {messagesWithKvkk.slice(1).map((msg, idx) => {
                     const isAgent = msg.sender === "Siz";
                     const isSystem = msg.sender === "Sistem";
-                    // Platforma göre balon rengi belirle (gradient)
-                    let bubbleBg = isAgent ? '#23262b' : '#23262b';
+                    // Platforma göre balon rengi belirle 
+                    let bubbleBg = isAgent ? '#27db5' : '#23292b';
                     let bubbleColor = '#fff';
                     if (!isAgent && !isSystem) {
                         switch (conversation.platform) {
@@ -432,7 +459,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                 bubbleColor = '#fff';
                         }
                     } else if (isAgent) {
-                        bubbleBg = 'linear-gradient(135deg, #23262b 0%, #48494b 100%)';
+                        bubbleBg = 'linear-gradient(135deg, #3a3a3a 0%, #636363 100%)';
                         bubbleColor = '#fff';
                     } else if (isSystem) {
                         bubbleBg = '#eafaf7';
@@ -505,7 +532,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
             {/* Mesaj yazma alanı */}
             {status === 'Kapatıldı' ? (
                 <div style={{
-                    background: '#23262b',
+                    background: '#2C2C2C',
                     borderRadius: 8,
                     padding: '18px 16px',
                     marginTop: 0,
@@ -558,13 +585,14 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                             outline: 'none',
                             borderRadius: 5,
                             padding: 10,
-                            background: '#181818',
+                            background: 'transparent',
                             color: '#fff',
-                            fontSize: 15
+                            fontSize: 15,
+                            '::placeholder': { color: '#fff' }
                         }}
                     />
                     <button
-                        className="button-hover"
+                        className="chat-send-btn-animated"
                         style={{
                             background: '#275db5',
                             color: '#fff',
@@ -573,11 +601,21 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                             padding: '10px 20px',
                             fontWeight: 600,
                             fontSize: 16,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            transition: 'background 0.18s cubic-bezier(.4,0,.2,1), transform 0.18s cubic-bezier(.4,0,.2,1)'
                         }}
                     >
                         Gönder
                     </button>
+                    <style>{`
+                        .chat-send-btn-animated:hover {
+                            background: #3976e6 !important;
+                            transform: scale(1.04);
+                        }
+                        .chat-send-btn-animated:active {
+                            transform: scale(0.98);
+                        }
+                    `}</style>
                 </div>
             )}
         </div>

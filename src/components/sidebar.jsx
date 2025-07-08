@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { FiLogOut, FiChevronLeft, FiChevronRight, FiMenu, FiChevronDown, FiChevronUp, FiUser, FiStar, FiMessageCircle } from "react-icons/fi";
+import { MdEmail } from "react-icons/md";
 
-function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar, conversationFilter, onConversationFilterChange, dailyConversationCount, dailyAnsweredCount }) {
+function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar, conversationFilter, onConversationFilterChange, dailyConversationCount, dailyAnsweredCount, logout }) {
 
     const [openSections, setOpenSections] = useState({
         conversations: true,
@@ -109,11 +110,11 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
                                 {openSections.documents && (
                                     <div className="sidebar-accordion-content">
 
-                                        <p className="menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <p className="menu-item" style={{ color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <FiUser /> Yanıtlanan Kişi
                                             <span style={{ marginLeft: 'auto', fontWeight: 600, color: '#ffb300' }}>{dailyAnsweredCount}</span>
                                         </p>
-                                        <p className="menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <p className="menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff' }}>
                                             <FiUser /> Günlük Toplam Konuşma
                                             <span style={{ marginLeft: 'auto', fontWeight: 600, color: '#275db5' }}>{dailyConversationCount}</span>
                                         </p>
@@ -124,23 +125,34 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
                             <div className="menu-section">
                                 <div className={`menu-title${openSections.groups ? ' open' : ''}`} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSection('groups')}>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                                        <FiUser style={{ fontSize: 18, color: '#4caf50' }} /> Takımlar
+                                        <FiUser style={{ fontSize: 16, color: '#4caf50' }} /> Takımlar
                                     </span>
                                     <span className="chevron">{openSections.groups ? <FiChevronUp /> : <FiChevronDown />}</span>
                                 </div>
                                 {openSections.groups && (
                                     <div className="sidebar-accordion-content">
-                                        <div style={{ fontWeight: 600, color: '#ffb300', marginBottom: 6, fontSize: 14 }}>Yöneticiler</div>
-                                        <div style={{ color: '#fff', fontSize: 13, marginBottom: 10 }}>
-                                            <div>Ayşe Yılmaz</div>
-                                            <div>Mehmet Demir</div>
-                                        </div>
-                                        <div style={{ fontWeight: 600, color: '#275db5', marginBottom: 6, fontSize: 14 }}>Ekip Arkadaşları</div>
-                                        <div style={{ color: '#fff', fontSize: 13 }}>
-                                            <div>Ali Vural</div>
-                                            <div>Zeynep Kaya</div>
-                                            <div>Sen (Pelin)</div>
-                                        </div>
+                                        <div style={{ fontWeight: 600, color: '#ffb300', fontSize: 14, marginLeft: 16, marginBottom: 12, letterSpacing: 0.2 }}>Yöneticiler</div>
+                                        <ul style={{ listStyle: 'none', padding: 0, marginLeft: 8, marginBottom: 8 }}>
+                                            <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
+                                                <FiUser style={{ fontSize: 13 }} /> Ayşe Yılmaz
+                                            </li>
+                                            <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
+                                                <FiUser style={{ fontSize: 13 }} /> Mehmet Demir
+                                            </li>
+                                        </ul>
+                                        <hr style={{ border: 0, borderTop: '1px solid #222', margin: '16px 0 16px 16px', width: '80%' }} />
+                                        <div style={{ fontWeight: 600, color: '#275db5', fontSize: 14, marginLeft: 16, marginBottom: 12, marginTop: 8, letterSpacing: 0.2 }}>Ekip Arkadaşları</div>
+                                        <ul style={{ listStyle: 'none', padding: 0, marginLeft: 8 }}>
+                                            <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
+                                                <FiUser style={{ fontSize: 13 }} /> Ali Vural
+                                            </li>
+                                            <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
+                                                <FiUser style={{ fontSize: 13 }} /> Zeynep Kaya
+                                            </li>
+                                            <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
+                                                <FiUser style={{ fontSize: 13 }} /> Sen (Pelin)
+                                            </li>
+                                        </ul>
                                     </div>
                                 )}
                             </div>
@@ -150,21 +162,27 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
             </div>
             {/* */}
             {!collapsed && (
-                <div className="sidebar-bottom" style={{ width: '100%' }}>
-                    <div className="user-info-box" style={{ marginBottom: '8px' }}>
-                        <span className="user-name">Pelin</span>
-                        <span className="user-mail">iknowtechnology@gmail.com</span>
+                <div className="sidebar-bottom" style={{ width: '100%', padding: '0 0 8px 0' }}>
+                    <div className="user-info-box" style={{ marginBottom: 4, paddingLeft: 18 }}>
+                        <div className="user-name" style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <FiUser style={{ fontSize: 15, color: '#fff' }} />
+                            Pelin DEMİR
+                        </div>
+                        <div className="user-mail" style={{ fontSize: 15, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <MdEmail style={{ fontSize: 17, color: '#bdbdbd' }} />
+                            iknowtechnology@gmail.com
+                        </div>
                     </div>
                     <hr className="sidebar-divider" style={{ margin: '10px 0' }} />
-                    <div className="user-info-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', boxShadow: 'none', padding: 0, marginTop: '-8px' }}>
+                    <div className="user-info-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: 'transparent', boxShadow: 'none', paddingLeft: 10, marginTop: '-4px' }}>
                         <button
                             className="logout-btn"
                             title="Çıkış Yap"
-                            onClick={() => alert('Çıkış yapıldı!')}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            onClick={logout}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, padding: 0 }}
                         >
-                            <FiLogOut />
-                            <span style={{ fontSize: '14px', color: '#fff' }}>Çıkış Yap</span>
+                            <FiLogOut style={{ fontSize: 17 }} />
+                            <span style={{ fontSize: 15, color: '#fff' }}>Çıkış Yap</span>
                         </button>
                     </div>
                 </div>
