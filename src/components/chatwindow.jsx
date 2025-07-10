@@ -447,11 +447,11 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                                 bubbleColor = '#fff';
                                 break;
                             case 'email':
-                                bubbleBg = 'linear-gradient(135deg,rgb(230, 196, 119) 0%,rgb(160, 131, 45) 100%)';
+                                bubbleBg = 'linear-gradient(135deg,rgb(215, 172, 69) 0%,rgb(235, 209, 133) 100%)';
                                 bubbleColor = '#23262b';
                                 break;
                             case 'web':
-                                bubbleBg = 'linear-gradient(135deg, #275db5 0%, #4f8cff 100%)';
+                                bubbleBg = 'linear-gradient(135deg,rgb(41, 90, 170) 0%,rgb(68, 117, 208) 100%)';
                                 bubbleColor = '#fff';
                                 break;
                             default:
@@ -609,7 +609,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                     </button>
                     <style>{`
                         .chat-send-btn-animated:hover {
-                            background: #3976e6 !important;
+                            background:rgb(69, 125, 230) !important;
                             transform: scale(1.04);
                         }
                         .chat-send-btn-animated:active {

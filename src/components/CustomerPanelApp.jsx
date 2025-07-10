@@ -198,7 +198,7 @@ const dummyConversations = [
 export default function CustomerPanelApp() {
     const { logout } = useAuth();
     const [conversations, setConversations] = useState(dummyConversations);
-    const [selectedId, setSelectedId] = useState(conversations[0]?.id || null);
+    const [selectedId, setSelectedId] = useState(null); // Başlangıçta hiçbir sohbet seçili değil
     const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     // Sohbet filtreleme state'i: 'all', 'waiting', 'answered'
@@ -339,22 +339,55 @@ export default function CustomerPanelApp() {
                         onEndChat={handleEndChat}
                     />
                 </div>
-                <div className="chatwindow-panel">
-                    <ChatWindow
-                        conversation={selectedConversation}
-                        onEndChat={handleEndChat}
-                        onStartChat={handleStartChat}
-                    />
-                </div>
-                <div className="customer-panel-wrapper">
-                    <CustomerPanel
-                        customer={customer}
-                        handleSendMessage={handleSendMessage}
-                        onEndChat={handleEndChat}
-                        conversationStatus={selectedConversation?.status}
-                        conversationId={selectedConversation?.id}
-                    />
-                </div>
+                {selectedConversation ? (
+                    <>
+                        <div className="chatwindow-panel">
+                            <ChatWindow
+                                conversation={selectedConversation}
+                                onEndChat={handleEndChat}
+                                onStartChat={handleStartChat}
+                            />
+                        </div>
+                        <div className="customer-panel-wrapper">
+                            <CustomerPanel
+                                customer={customer}
+                                handleSendMessage={handleSendMessage}
+                                onEndChat={handleEndChat}
+                                conversationStatus={selectedConversation?.status}
+                                conversationId={selectedConversation?.id}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="chatwindow-panel" style={{ height: '100%' }}>
+                            <div style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                height: '100%', width: '100%', background: '#181818', borderRadius: 12, boxShadow: '0 2px 16px -4px #0008',
+                                margin: 0, minHeight: 0, padding: 0
+                            }}>
+                                <h2 style={{
+                                    fontWeight: 800,
+                                    fontSize: 30,
+                                    letterSpacing: 0.5,
+                                    color: '#275db5',
+                                    textShadow: '0 2px 8px #1a2a4a22, 0 1px 0 #fff2',
+                                    fontFamily: 'Segoe UI, Arial, sans-serif',
+                                    lineHeight: 1.1,
+                                    marginBottom: 24
+                                }}>CallPilot</h2>
+                                <h2 style={{ color: '#275db5', fontWeight: 800, fontSize: 26, marginBottom: 10, letterSpacing: 0.5 }}>Hoş geldiniz!</h2>
+                                <p style={{ color: '#fff', fontSize: 16, marginBottom: 18, maxWidth: 340, textAlign: 'center' }}>
+                                    Lütfen sol taraftan bir sohbet seçin veya yeni bir müşteriyle iletişime geçin.<br />
+                                </p>
+                                <a href="https://yardim.orneksirket.com" target="_blank" rel="noopener noreferrer" style={{ color: '#b0c7f7', fontSize: 15, textDecoration: 'underline', marginBottom: 8, display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                    Hızlı Yardım Merkezi
+                                </a>
+                            </div>
+                        </div>
+                        <div className="customer-panel-wrapper" style={{ height: '100%' }}></div>
+                    </>
+                )}
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { FiTrash2, FiChevronDown, FiChevronUp, FiUser } from "react-icons/fi";
 import './CustomerPanel.css';
 
@@ -22,6 +22,10 @@ const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
 const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
 
 function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId, onShowHistory }) {
+    const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
+    const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
+    const [showManagerList, setShowManagerList] = useState(false);
+    const [selectedManager, setSelectedManager] = useState("");
     const [note, setNote] = useState("");
     const [savedNote, setSavedNote] = useState("");
     const [noteOpen, setNoteOpen] = useState(true);
@@ -34,6 +38,12 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
     const [info, setInfo] = useState("");
     const [showMakroMenu, setShowMakroMenu] = useState(false);
 
+    function handleManagerTransfer() {
+        setShowManagerModal(false);
+        setInfo('Mesaj yöneticiye aktarıldı!');
+        setTimeout(() => setInfo(''), 2000);
+    }
+
     const handleSaveNote = () => {
         setSavedNote(note);
         setNote("");
@@ -43,11 +53,6 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
         setNote("");
     };
     // Aksiyonlar
-    const handleManagerTransfer = () => {
-        setShowManagerModal(false);
-        setInfo("Mesaj yöneticiye aktarıldı!");
-        setTimeout(() => setInfo(""), 2000);
-    };
     const handleAgentTransfer = () => {
         setShowAgentModal(false);
         setInfo(`Mesaj ${selectedAgent} adlı temsilciye aktarıldı!`);
@@ -141,7 +146,51 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                         </div>
                     )}
                 </div>
-                <button className="action-btn" onClick={() => setShowManagerModal(true)}>Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span></button>
+                <button
+                    className="action-btn"
+                    onClick={() => setShowManagerModal(true)}
+                >
+                    Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span>
+                </button>
+                {showManagerList && (
+                    <div style={{
+                        background: '#23262b',
+                        color: '#fff',
+                        borderRadius: 8,
+                        marginTop: 6,
+                        padding: 12,
+                        minWidth: 180,
+                        boxShadow: '0 2px 8px #0004'
+                    }}>
+                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>
+                            Aktarılacak yönetici seçiniz:
+                        </div>
+                        {managers.map(manager => (
+                            <button
+                                key={manager}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    background: selectedManager === manager ? '#275db5' : '#181818',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: 5,
+                                    padding: '7px 0',
+                                    marginBottom: 4,
+                                    cursor: 'pointer',
+                                    fontWeight: 500
+                                }}
+                                onClick={() => {
+                                    setSelectedManager(manager);
+                                    setShowManagerList(false);
+                                    handleManagerTransfer(manager);
+                                }}
+                            >
+                                {manager}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
                 <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
                 { /* <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>*/}
@@ -228,7 +277,15 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                     </>
                 )}
             </div>
+            {/* Hızlı Yardım Merkezi linki 
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+                <a href="https://yardim.orneksirket.com" target="_blank" rel="noopener noreferrer" style={{ color: '#b0c7f7', fontSize: 15, textDecoration: 'underline' }}>
+                    Hızlı Yardım Merkezi
+                </a>
+            </div> */}
         </div>
+
     );
+
 }
 export default CustomerPanel;

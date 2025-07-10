@@ -31,7 +31,16 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
                 {/* */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 0, marginTop: 4 }}>
                     {!collapsed && (
-                        <h2 className="logo" style={{ color: '#275db5', margin: 0, fontSize: 22, fontWeight: 'bold' }}>CallPilot</h2>
+                        <h2 className="logo" style={{
+                            fontWeight: 800,
+                            fontSize: 22,
+                            letterSpacing: 0.5,
+                            color: '#275db5',
+                            textShadow: '0 2px 8px #1a2a4a22, 0 1px 0 #fff2',
+                            fontFamily: 'Segoe UI, Arial, sans-serif',
+                            lineHeight: 1.1,
+                            margin: 5,
+                        }}>CallPilot</h2>
                     )}
                     <button
                         onClick={onToggleSidebar}
@@ -128,9 +137,16 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
                                         <FiUser style={{ fontSize: 16, color: '#4caf50' }} /> Takımlar
                                     </span>
                                     <span className="chevron">{openSections.groups ? <FiChevronUp /> : <FiChevronDown />}</span>
+
                                 </div>
                                 {openSections.groups && (
                                     <div className="sidebar-accordion-content">
+                                        <hr style={{
+                                            border: 0,
+                                            borderTop: '1px solid rgba(171, 166, 166, 0.45)',
+                                            margin: '12px 16px',
+                                            width: 'calc(100% - 32px)'
+                                        }} />
                                         <div style={{ fontWeight: 600, color: '#ffb300', fontSize: 14, marginLeft: 16, marginBottom: 12, letterSpacing: 0.2 }}>Yöneticiler</div>
                                         <ul style={{ listStyle: 'none', padding: 0, marginLeft: 8, marginBottom: 8 }}>
                                             <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
@@ -140,8 +156,21 @@ function Sidebar({ showFavorites, onToggleFavorites, collapsed, onToggleSidebar,
                                                 <FiUser style={{ fontSize: 13 }} /> Mehmet Demir
                                             </li>
                                         </ul>
-                                        <hr style={{ border: 0, borderTop: '1px solid #222', margin: '16px 0 16px 16px', width: '80%' }} />
-                                        <div style={{ fontWeight: 600, color: '#275db5', fontSize: 14, marginLeft: 16, marginBottom: 12, marginTop: 8, letterSpacing: 0.2 }}>Ekip Arkadaşları</div>
+                                        <hr style={{
+                                            border: 0,
+                                            borderTop: '1px solid rgba(171, 166, 166, 0.45)',
+                                            margin: '12px 16px',
+                                            width: 'calc(100% - 32px)'
+                                        }} />
+                                        <div style={{
+                                            fontWeight: 600,
+                                            color: '#275db5',
+                                            fontSize: 14,
+                                            marginLeft: 16,
+                                            marginBottom: 12,
+                                            marginTop: 8,
+                                            letterSpacing: 0.2
+                                        }}>Ekip Arkadaşları</div>
                                         <ul style={{ listStyle: 'none', padding: 0, marginLeft: 8 }}>
                                             <li style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 13, marginBottom: 3 }}>
                                                 <FiUser style={{ fontSize: 13 }} /> Ali Vural
