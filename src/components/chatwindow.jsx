@@ -350,18 +350,40 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbeti bitirmek istediğinize emin misiniz?</div>
                         <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 14, marginTop: 8 }}>Sohbeti neden bitirmek istiyorsunuz?</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Müşterinin sorunu çözüldü' ? '#275db5' : '#232b36', color: endReason === 'Müşterinin sorunu çözüldü' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Müşterinin sorunu çözüldü' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
-                                <input type="radio" name="endReason" value="Müşterinin sorunu çözüldü" checked={endReason === 'Müşterinin sorunu çözüldü'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
-                                <span style={{ flex: 1, textAlign: 'left' }}>Müşterinin sorunu çözüldü</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Kullanıcı Sohbeti Terk etti' ? '#275db5' : '#232b36', color: endReason === 'Kullanıcı Sohbeti Terk etti' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Kullanıcı Sohbeti Terk etti' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
-                                <input type="radio" name="endReason" value="Kullanıcı Sohbeti Terk etti" checked={endReason === 'Kullanıcı Sohbeti Terk etti'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
-                                <span style={{ flex: 1, textAlign: 'left' }}>Kullanıcı Sohbeti Terk etti</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', background: endReason === 'Başka durumlar' ? '#275db5' : '#232b36', color: endReason === 'Başka durumlar' ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === 'Başka durumlar' ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38 }}>
-                                <input type="radio" name="endReason" value="Başka durumlar" checked={endReason === 'Başka durumlar'} onChange={e => setEndReason(e.target.value)} style={{ marginRight: 12, accentColor: '#275db5', flexShrink: 0 }} />
-                                <span style={{ flex: 1, textAlign: 'left' }}>Başka durumlar</span>
-                            </label>
+                            {[
+                                { value: 'Müşterinin sorunu çözüldü', label: 'Müşterinin sorunu çözüldü' },
+                                { value: 'Kullanıcı Sohbeti Terk etti', label: 'Kullanıcı Sohbeti Terk etti' },
+                                { value: 'Başka durumlar', label: 'Başka durumlar' }
+                            ].map(opt => (
+                                <label
+                                    key={opt.value}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', background: endReason === opt.value ? '#275db5' : '#232b36', color: endReason === opt.value ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === opt.value ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38
+                                    }}
+                                >
+                                    {/* Sadece seçiliyse ve bu seçeneklerden biriyse dolu daire göster */}
+                                    {endReason === opt.value && (
+                                        <span style={{
+                                            display: 'inline-block',
+                                            width: 14,
+                                            height: 14,
+                                            borderRadius: '50%',
+                                            background: '#fff',
+                                            border: '3px solid #275db5',
+                                            marginRight: 10
+                                        }} />
+                                    )}
+                                    <input
+                                        type="radio"
+                                        name="endReason"
+                                        value={opt.value}
+                                        checked={endReason === opt.value}
+                                        onChange={e => setEndReason(e.target.value)}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <span style={{ flex: 1, textAlign: 'left' }}>{opt.label}</span>
+                                </label>
+                            ))}
                         </div>
                         <button style={{ background: endReason ? '#d64e4e' : '#888', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: endReason ? 'pointer' : 'not-allowed', opacity: endReason ? 1 : 0.7, transition: 'background 0.15s' }} onClick={() => endReason && handleEndChatConfirmed(endReason)} disabled={!endReason}>Evet, Bitir</button>
                         <button style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowEndChatModal(false)}>Vazgeç</button>

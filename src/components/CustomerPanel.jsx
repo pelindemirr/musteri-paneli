@@ -100,6 +100,14 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
             <div className="customer-actions">
                 <div className="actions-title">Aksiyonlar</div>
 
+                <button
+                    className="action-btn"
+                    onClick={() => setShowManagerModal(true)}
+                >
+                    Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span>
+                </button>
+                <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
+                <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
                 {/* Makrolar butonu ve açılır menü */}
                 <div style={{ position: 'relative', marginBottom: 10 }}>
                     <button
@@ -146,12 +154,6 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                         </div>
                     )}
                 </div>
-                <button
-                    className="action-btn"
-                    onClick={() => setShowManagerModal(true)}
-                >
-                    Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span>
-                </button>
                 {showManagerList && (
                     <div style={{
                         background: '#23262b',
@@ -191,8 +193,6 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                         ))}
                     </div>
                 )}
-                <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
-                <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
                 { /* <button className="action-btn" onClick={() => setShowReadyMessages2(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>*/}
                 {/* Info  */}
                 {info && <div style={{ marginTop: 10, color: '#275db5', fontWeight: 500, textAlign: 'center' }}>{info}</div>}

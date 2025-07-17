@@ -13,3 +13,37 @@
     background: #275db5;
     color: #fff;
 }
+
+.action-btn {
+
+    background: #3f4043;
+    color: #fff;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    padding: 10px 0;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.18s, color 0.18s;
+}
+
+.action-btn:hover,
+.action-btn:focus {
+    background: #275db5;
+    color: #fff;
+}
+
+.superadmin-action-btn {
+    background: #313337 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+.superadmin-action-btn:hover,
+.superadmin-action-btn:focus {
+    background: #5a5c63 !important;
+}

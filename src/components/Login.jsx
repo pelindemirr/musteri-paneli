@@ -12,7 +12,8 @@ export default function Login() {
 
         const USERS = {
             admin: { password: "1234", role: "admin" },
-            agent: { password: "1234", role: "agent" }
+            agent: { password: "1234", role: "agent" },
+            superadmin: { password: "1234", role: "superadmin" }
         };
 
         const user = USERS[username];

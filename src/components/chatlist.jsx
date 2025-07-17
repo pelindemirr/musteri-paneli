@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaWhatsapp, FaFacebookMessenger } from "react-icons/fa";
-import { FiMail, FiGlobe, FiMessageCircle, FiAlertCircle } from "react-icons/fi";
+import { FiMail, FiGlobe, FiMessageCircle, FiAlertCircle, FiChevronDown, FiChevronUp, FiSearch, FiUser, FiUsers, FiClock, FiFilter } from "react-icons/fi";
 
 // Yardımcı saat formatlayıcı
 function formatTime(date) {
@@ -40,9 +40,12 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
         return () => clearInterval(interval);
     }, []);
 
+    // Filtre state'leri ve filtre arayüzü kaldırıldı
+
     return (
         <div style={{ padding: 16 }}>
-            <h3 style={{ color: "#275db5" }}>Sohbetler</h3>
+            <h3 style={{ color: "#275db5", margin: 0, marginBottom: 8 }}>Aktif Sohbetler</h3>
+            {/* Sohbet listesi */}
             {conversations.map((conv) => {
                 const lastMessage = conv.messages[conv.messages.length - 1];
 
@@ -80,6 +83,7 @@ function ChatList({ conversations, selectedId, onSelect, onToggleFavorite, onSta
                         if (lastCustomerMsgTime && (!lastAgentMsgTime || lastCustomerMsgTime > lastAgentMsgTime)) {
                             timerSec = Math.floor((now - lastCustomerMsgTime.getTime()) / 1000);
                         }
+
                         timerSec = Math.max(0, Math.min(timerSec, BAR_MAX_SECONDS));
                         // Bar rengi ve genişliği
                         if (timerSec < BAR_GREEN_SECONDS) {
