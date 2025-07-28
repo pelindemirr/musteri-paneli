@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FiLogOut, FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiUser, FiStar, FiMessageCircle, FiSettings, FiBarChart2, FiUsers, FiActivity } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
 
-export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSection, onSectionChange }) {
+export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSection, onSectionChange, onOpenMacroModal, onOpenUserPanel }) {
     const { logout } = useAuth();
     const [openSections, setOpenSections] = useState({
         conversations: true,
@@ -139,16 +139,17 @@ export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSe
                                 {openSections.agents && (
                                     <div className="sidebar-accordion-content">
                                         <button
-                                            className={`menu-button ${activeSection === 'agents' ? "active" : ""}`}
-                                            onClick={() => onSectionChange('agents')}
-                                        >
-                                            Temsilci Listesi
-                                        </button>
-                                        <button
                                             className={`menu-button ${activeSection === 'performance' ? "active" : ""}`}
                                             onClick={() => onSectionChange('performance')}
                                         >
                                             Performans Raporları
+                                        </button>
+                                        <button
+                                            className="menu-button"
+                                            onClick={onOpenUserPanel}
+                                            style={{ color: '#fff', fontWeight: 500 }}
+                                        >
+                                            Kullanıcı Yönetimi
                                         </button>
                                     </div>
                                 )}
@@ -175,6 +176,13 @@ export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSe
                                             onClick={() => onSectionChange('notifications')}
                                         >
                                             Bildirim Ayarları
+                                        </button>
+                                        <button
+                                            className="menu-button"
+                                            onClick={onOpenMacroModal}
+                                            style={{ color: '#fff', fontWeight: 500 }}
+                                        >
+                                            Makro Yönetimi
                                         </button>
                                     </div>
                                 )}

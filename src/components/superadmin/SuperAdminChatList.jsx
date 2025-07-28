@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { FiUser, FiSearch, FiClock, FiLayers, FiChevronDown, FiChevronUp } from "react-icons/fi";
 
-export default function SuperAdminChatList({ conversations, selectedId, onSelectConversation, conversationFilter }) {
+export default function SuperAdminChatList({ conversations, selectedId, onSelectConversation, conversationFilter, macroModalOpen }) {
     // Filtre state'leri
     const [sortOrder, setSortOrder] = useState('desc');
     const [agentFilter, setAgentFilter] = useState('');
@@ -33,15 +33,17 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
     });
 
     return (
-        <div style={{
-            width: '320px',
-            height: '100%',
-            background: '#23262b',
-            borderRight: '1px solid #333',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
+        <div
+            style={{
+                width: '320px',
+                height: '100%',
+                background: '#23262b',
+                borderRight: '1px solid #333',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
             <div style={{
                 padding: '15px',
                 borderBottom: '1px solid #333',

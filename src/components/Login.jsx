@@ -1,29 +1,43 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { validateEmail, validatePassword, validateTC } from "../utils/validation";
 
 export default function Login() {
     const { login } = useAuth();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
+    // Kullanıcı adı validasyonu sadece boş olmasın
+    function validateUsername(val) {
+        if (!val.trim()) return "Kullanıcı adı zorunludur";
+        return "";
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const uErr = validateUsername(username);
+        const pErr = validatePassword(password);
+        setUsernameError(uErr);
+        setPasswordError(pErr);
+        if (uErr || pErr) return;
 
         const USERS = {
-            admin: { password: "1234", role: "admin" },
-            agent: { password: "1234", role: "agent" },
-            superadmin: { password: "1234", role: "superadmin" }
+            admin: { password: "123456", role: "admin" },
+            agent: { password: "123456", role: "agent" },
+            superadmin: { password: "123456", role: "superadmin" }
         };
-
         const user = USERS[username];
-
         if (user && user.password === password) {
             login(user.role);
         } else {
             setError("Kullanıcı adı veya şifre hatalı!");
         }
     };
+
+    const isValid = username.trim() && password.trim();
 
     return (
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#181818" }}>
@@ -55,9 +69,9 @@ export default function Login() {
                 <h2 style={{ marginBottom: 8, color: "#fff", fontSize: 18, fontWeight: 600, letterSpacing: 0.1 }}>Giriş Yap</h2>
                 <input
                     type="text"
-                    placeholder="Kullanıcı Adı"
+                    placeholder="Kullanıcı Adı "
                     value={username}
-                    onChange={e => setUsername(e.target.value)}
+                    onChange={e => { setUsername(e.target.value); setUsernameError(""); setError(""); }}
                     style={{
                         width: "100%",
                         marginBottom: 0,
@@ -73,11 +87,12 @@ export default function Login() {
                     onFocus={e => e.target.style.border = '1.5px solid #275db5'}
                     onBlur={e => e.target.style.border = '1px solid #2d3a4a'}
                 />
+                {usernameError && <div style={{ color: "#ff5252", marginBottom: 0, fontSize: 12, alignSelf: "flex-start" }}>{usernameError}</div>}
                 <input
                     type="password"
                     placeholder="Şifre"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={e => { setPassword(e.target.value); setPasswordError(""); setError(""); }}
                     style={{
                         width: "100%",
                         marginBottom: 0,
@@ -93,6 +108,7 @@ export default function Login() {
                     onFocus={e => e.target.style.border = '1.5px solid #275db5'}
                     onBlur={e => e.target.style.border = '1px solid #2d3a4a'}
                 />
+                {passwordError && <div style={{ color: "#ff5252", marginBottom: 0, fontSize: 12, alignSelf: "flex-start" }}>{passwordError}</div>}
                 <style>{`
                     input::placeholder {
                         color: #b0b0b0 !important;
@@ -113,8 +129,9 @@ export default function Login() {
                     letterSpacing: 0.1,
                     boxShadow: "0 1px 4px -2px #0006",
                     transition: "background 0.18s cubic-bezier(.4,0,.2,1), transform 0.18s cubic-bezier(.4,0,.2,1)",
-                    cursor: "pointer"
-                }}>
+                    cursor: isValid ? "pointer" : "not-allowed",
+                    opacity: isValid ? 1 : 0.6
+                }} disabled={!isValid}>
                     Giriş Yap
                 </button>
                 <style>{`

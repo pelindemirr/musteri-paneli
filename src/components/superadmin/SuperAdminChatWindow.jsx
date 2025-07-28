@@ -241,8 +241,20 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
                     }
                     return (
                         <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: (isAgent || isSuperAdmin) ? 'flex-end' : 'flex-start', marginBottom: 6 }}>
-                            {/* Sadece superadmin için üstte etiket */}
-                            {isSuperAdmin && superAdminLabel}
+                            {/* Temsilci veya superadmin için üstte etiket */}
+                            {(isAgent || isSuperAdmin) && (
+                                <div style={{
+                                    fontSize: '10px',
+                                    color: '#1976d2',
+                                    opacity: 0.6,
+                                    marginBottom: 2,
+                                    textAlign: 'right',
+                                    width: '100%',
+                                    paddingRight: 2
+                                }}>
+                                    {message.sender}
+                                </div>
+                            )}
                             <div style={{
                                 maxWidth: '70%',
                                 padding: '10px 14px 22px 14px',

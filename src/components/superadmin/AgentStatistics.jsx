@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import '../CustomerPanel.css';
 
-export default function AgentStatistics({ customer }) {
+export default function AgentStatistics({ customer, macroModalOpen }) {
     // Temsilciye aktarma için state'ler
-    const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"];
+    const agents = ["Ali Vural", "Zeynep Kaya", "Ali Kadem", "Elif Gün", "Berat Şaş"];
     const [showAgentModal, setShowAgentModal] = useState(false);
     const [selectedAgent, setSelectedAgent] = useState(agents[0]);
     const [info, setInfo] = useState("");
@@ -74,16 +74,36 @@ export default function AgentStatistics({ customer }) {
         }
     }
 
+    if (!customer) {
+        return (
+            <div
+                style={{
+                    width: '350px',
+                    height: '100%',
+                    background: '#23262b',
+                    borderLeft: '1px solid #333',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+            >
+
+            </div>
+        );
+    }
+
     return (
-        <div style={{
-            width: '350px',
-            height: '100%',
-            background: '#23262b',
-            borderLeft: '1px solid #333',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
+        <div
+            style={{
+                width: '350px',
+                height: '100%',
+                background: '#23262b',
+                borderLeft: '1px solid #333',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
             <div style={{
                 padding: '15px',
                 borderBottom: '1px solid #333',

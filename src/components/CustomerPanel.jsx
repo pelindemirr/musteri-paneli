@@ -17,13 +17,13 @@ const readyMessages2 = [
     "Başka bir konuda yardımcı olabilir miyim?"
 ];
 // Yöneticiler
-const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
+const managers = ["Ayşe Yılmaz", "Mehmet Demir", "Enes Deniz"];
 // Ekip arkadaşları 
-const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
+const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural", "Ali Kadem", "Elif Gün", "Berat Şaş "].filter(name => !managers.includes(name));
 
 function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationStatus, conversationId, onShowHistory }) {
     const managers = ["Ayşe Yılmaz", "Mehmet Demir"];
-    const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural"].filter(name => !managers.includes(name));
+    const agents = ["Ayşe Yılmaz", "Mehmet Demir", "Zeynep Kaya", "Ali Vural", "Ali Kadem", "Elif Gün", "Berat Şaş "].filter(name => !managers.includes(name));
     const [showManagerList, setShowManagerList] = useState(false);
     const [selectedManager, setSelectedManager] = useState("");
     const [note, setNote] = useState("");
@@ -101,22 +101,35 @@ function CustomerPanel({ customer, handleSendMessage, onEndChat, conversationSta
                 <div className="actions-title">Aksiyonlar</div>
 
                 <button
-                    className="action-btn"
+                    className="action-btn superadmin-action-btn"
                     onClick={() => setShowManagerModal(true)}
                 >
-                    Mesajları yöneticiye aktar <span style={{ color: '#275db5' }}>+</span>
+                    <span>Mesajları yöneticiye aktar</span>
+                    <span style={{ color: '#275db5', fontWeight: 700, fontSize: 18 }}>+</span>
                 </button>
-                <button className="action-btn" onClick={() => setShowAgentModal(true)}>Başka bir temsilciye aktar <span style={{ color: '#275db5' }}>+</span></button>
-                <button className="action-btn" onClick={() => setShowReadyMessages1(v => !v)}>Hazır Mesajlar <span style={{ color: '#275db5' }}>+</span></button>
+                <button
+                    className="action-btn superadmin-action-btn"
+                    onClick={() => setShowAgentModal(true)}
+                >
+                    <span>Başka bir temsilciye aktar</span>
+                    <span style={{ color: '#275db5', fontWeight: 700, fontSize: 18 }}>+</span>
+                </button>
+                <button
+                    className="action-btn superadmin-action-btn"
+                    onClick={() => setShowReadyMessages1(v => !v)}
+                >
+                    <span>Hazır Mesajlar</span>
+                    <span style={{ color: '#275db5', fontWeight: 700, fontSize: 18 }}>+</span>
+                </button>
                 {/* Makrolar butonu ve açılır menü */}
                 <div style={{ position: 'relative', marginBottom: 10 }}>
                     <button
-                        className="action-btn"
-                        style={{ width: '100%', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 16, paddingRight: 16, fontSize: 15, fontWeight: 500 }}
+                        className="action-btn superadmin-action-btn"
+                        style={{ width: '100%', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 18, paddingRight: 18, fontSize: 15, fontWeight: 500 }}
                         onClick={() => setShowMakroMenu(v => !v)}
                     >
                         <span style={{ flex: 1, textAlign: 'left', fontSize: 15, fontWeight: 500 }}>Makrolar</span>
-                        <span style={{ fontSize: 15, fontWeight: 500, color: '#275db5', marginLeft: 8 }}>+</span>
+                        <span style={{ color: '#275db5', fontWeight: 700, fontSize: 18, marginLeft: 8 }}>+</span>
                     </button>
                     {typeof showMakroMenu === 'undefined' ? null : showMakroMenu && (
                         <div style={{

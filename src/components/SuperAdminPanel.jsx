@@ -3,6 +3,8 @@ import SuperAdminSidebar from "./superadmin/SuperAdminSidebar";
 import SuperAdminChatList from "./superadmin/SuperAdminChatList";
 import SuperAdminChatWindow from "./superadmin/SuperAdminChatWindow";
 import AgentStatistics from "./superadmin/AgentStatistics";
+import MacroModal from "./superadmin/MacroModal";
+import UserManagementPanel from "./superadmin/UserManagementPanel";
 
 // Zaman damgası ekleyen yardımcı fonksiyon
 const withTimestamps = (messages) =>
@@ -196,14 +198,46 @@ const dummyConversations = [
     // Ayşe'den (id:9) sonrası silindi
 ];
 
+// Her sohbete tek bir sorumlu temsilci atayarak veri tutarlılığını sağla
+const agentsForAssignment = ["Ali Vural", "Zeynep Kaya", "Ali Kadem", "Elif Gün", "Berat Şaş"];
+dummyConversations.forEach((conv, index) => {
+    // 1. Her sohbete döngüsel olarak bir sorumlu ata
+    const responsibleAgent = agentsForAssignment[index % agentsForAssignment.length];
+
+    // 2. Bu sohbetteki TÜM temsilci mesajlarını bu sorumlu temsilcinin adıyla GÜNCELLE
+    conv.messages.forEach(msg => {
+        // Müşteri veya Süper Admin olmayan tüm mesajlar temsilci mesajıdır
+        if (msg.sender !== conv.name && msg.sender !== 'Süper Admin') {
+            msg.sender = responsibleAgent;
+        }
+    });
+});
+
+// Hazır mesajlar (makrolar) başlangıcı
+const initialMacros = [
+    "Yardımcı olabildiysem ne mutlu!",
+    "İyi günler dilerim!",
+    "Teşekkürler, tekrar görüşmek üzere.",
+    "Sorununuz çözüldü mü?",
+    "Sohbeti sonlandırmak ister misiniz?",
+    "Başka bir temsilciye aktarmamı ister misiniz?",
+    "Yöneticiye aktarıyorum.",
+    "Herhangi bir sorunuz olursa tekrar yazabilirsiniz.",
+    "Görüşmek üzere!",
+    "Başka bir konuda yardımcı olabilir miyim?"
+];
+
 export default function SuperAdminPanel() {
     const [conversations, setConversations] = useState(dummyConversations);
+    const [macros, setMacros] = useState(initialMacros);
+    const [macroModalOpen, setMacroModalOpen] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [activeSection, setActiveSection] = useState('all');
     const [conversationFilter, setConversationFilter] = useState('all');
     // Her konuşma için devralma state'i
     const [takenOverConversations, setTakenOverConversations] = useState({});
+    const [userPanelOpen, setUserPanelOpen] = useState(false);
 
     const selectedConversation = conversations.find((c) => c.id === selectedId);
     const isTakenOver = selectedId ? takenOverConversations[selectedId] : false;
@@ -244,29 +278,42 @@ export default function SuperAdminPanel() {
         else if (section === 'answered') setConversationFilter('answered');
     };
 
+    // Makro CRUD fonksiyonları
+    const handleAddMacro = (msg) => setMacros(prev => [...prev, msg]);
+    const handleEditMacro = (idx, msg) => setMacros(prev => prev.map((m, i) => i === idx ? msg : m));
+    const handleDeleteMacro = (idx) => setMacros(prev => prev.filter((_, i) => i !== idx));
+
     return (
-        <div style={{
-            height: '100vh',
-            display: 'flex',
-            background: '#23262b'
-        }}>
+        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#1a1d21' }}>
             <SuperAdminSidebar
                 collapsed={sidebarCollapsed}
                 onToggleSidebar={handleToggleSidebar}
                 activeSection={activeSection}
                 onSectionChange={handleSectionChange}
+                onOpenMacroModal={() => setMacroModalOpen(true)}
+                onOpenUserPanel={() => setUserPanelOpen(true)}
             />
 
             <div style={{
-                flex: 1,
-                display: 'flex',
-                overflow: 'hidden'
-            }}>
+                width: '1px',
+                background: 'linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)',
+                boxShadow: '0 0 10px rgba(255, 255, 255, 0.1)'
+            }}></div>
+
+            <div
+                style={{
+                    flex: 1,
+                    display: 'flex',
+                    overflow: 'hidden',
+                    position: 'relative',
+                }}
+            >
                 <SuperAdminChatList
                     conversations={conversations}
                     selectedId={selectedId}
                     onSelectConversation={handleSelectConversation}
                     conversationFilter={conversationFilter}
+                    macroModalOpen={macroModalOpen}
                 />
 
                 <SuperAdminChatWindow
@@ -274,10 +321,38 @@ export default function SuperAdminPanel() {
                     onSendMessage={handleSendMessage}
                     isTakenOver={isTakenOver}
                     onTakeOver={handleTakeOver}
+                    macroModalOpen={macroModalOpen}
                 />
 
-                <AgentStatistics customer={selectedConversation} />
+                <AgentStatistics customer={selectedConversation} macroModalOpen={macroModalOpen} />
+
+                {userPanelOpen && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        zIndex: 3000,
+                        background: '#23262b', // opak koyu arka plan
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                    }}>
+                        <UserManagementPanel onClose={() => setUserPanelOpen(false)} />
+                    </div>
+                )}
             </div>
+            <MacroModal
+                open={macroModalOpen}
+                onClose={() => setMacroModalOpen(false)}
+                messages={macros}
+                onAdd={handleAddMacro}
+                onEdit={handleEditMacro}
+                onDelete={handleDeleteMacro}
+            />
         </div>
     );
 } 
