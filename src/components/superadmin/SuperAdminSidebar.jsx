@@ -3,7 +3,16 @@ import { useAuth } from "../../context/AuthContext";
 import { FiLogOut, FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiUser, FiStar, FiMessageCircle, FiSettings, FiBarChart2, FiUsers, FiActivity } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
 
-export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSection, onSectionChange, onOpenMacroModal, onOpenUserPanel }) {
+export default function SuperAdminSidebar({
+    collapsed,
+    onToggleSidebar,
+    activeSection,
+    onSectionChange,
+    onOpenMacroModal,
+    onOpenUserPanel,
+    onOpenMarketing
+
+}) {
     const { logout } = useAuth();
     const [openSections, setOpenSections] = useState({
         conversations: true,
@@ -184,6 +193,15 @@ export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSe
                                         >
                                             Makro Yönetimi
                                         </button>
+                                        <button
+                                            className="menu-button"
+                                            onClick={onOpenMarketing}
+
+                                            style={{ color: '#fff', fontWeight: 500 }}
+
+                                        >
+                                            Marketing
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -220,4 +238,4 @@ export default function SuperAdminSidebar({ collapsed, onToggleSidebar, activeSe
             )}
         </div>
     );
-} 
+}

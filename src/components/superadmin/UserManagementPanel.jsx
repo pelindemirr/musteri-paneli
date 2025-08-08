@@ -105,7 +105,7 @@ export default function UserManagementPanel({ onClose }) {
             <div style={styles.leftPanel}>
                 {/* ... (Header and search bar are fine) ... */}
                 <div style={styles.leftPanelHeader}>
-                    <h2 style={{ color: '#ffb300', margin: 0, fontSize: 22, fontWeight: 700 }}>Kullanıcı Yönetimi</h2>
+                    <h2 style={{ color: '#275db5', margin: 0, fontSize: 22, fontWeight: 700, marginleft: 25 }}>Kullanıcı Yönetimi</h2>
                     <button onClick={onClose} style={styles.closeButton}>×</button>
                 </div>
 

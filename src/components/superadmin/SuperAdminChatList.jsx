@@ -35,7 +35,7 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
     return (
         <div
             style={{
-                width: '320px',
+                width: '370px',
                 height: '100%',
                 background: '#23262b',
                 borderRight: '1px solid #333',
@@ -183,7 +183,7 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
                 </p>
             </div>
             <div style={{ padding: '10px 15px 0 15px' }}>
-                <h2 style={{ margin: 0, color: '#275db5', fontSize: '16px', fontWeight: 700, textAlign: 'center' }}>Aktif Konuşmalar</h2>
+                <h2 style={{ margin: 0, color: '#275db5', fontSize: '20px', fontWeight: 700, textAlign: 'center' }}>Aktif Konuşmalar</h2>
             </div>
             <div style={{ flex: 1, overflow: 'auto' }}>
                 {filteredConvs.map((conversation) => (
@@ -227,7 +227,7 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
                                     {conversation.name}
                                 </h3>
                                 <span style={{
-                                    fontSize: '10px',
+                                    fontSize: '11px',
                                     color: conversation.status === 'Bekliyor' ? '#ffc107' : '#28a745',
                                     fontWeight: '500'
                                 }}>
@@ -239,7 +239,7 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
                                 <p style={{
                                     margin: 0,
                                     color: '#888',
-                                    fontSize: '11px',
+                                    fontSize: '12px',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -248,7 +248,7 @@ export default function SuperAdminChatList({ conversations, selectedId, onSelect
                                     {conversation.messages[conversation.messages.length - 1]?.text || 'Mesaj yok'}
                                 </p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ fontSize: '9px', color: '#666' }}>
+                                    <span style={{ fontSize: '11px', color: '#666' }}>
                                         {conversation.platform}
                                     </span>
                                 </div>

@@ -5,7 +5,7 @@ import SuperAdminChatWindow from "./superadmin/SuperAdminChatWindow";
 import AgentStatistics from "./superadmin/AgentStatistics";
 import MacroModal from "./superadmin/MacroModal";
 import UserManagementPanel from "./superadmin/UserManagementPanel";
-
+import Marketing from "./superadmin/MarketingPanel";
 // Zaman damgası ekleyen yardımcı fonksiyon
 const withTimestamps = (messages) =>
     messages.map((msg, index) => ({
@@ -239,6 +239,8 @@ export default function SuperAdminPanel() {
     const [takenOverConversations, setTakenOverConversations] = useState({});
     const [userPanelOpen, setUserPanelOpen] = useState(false);
 
+
+
     const selectedConversation = conversations.find((c) => c.id === selectedId);
     const isTakenOver = selectedId ? takenOverConversations[selectedId] : false;
     const handleTakeOver = () => {
@@ -278,6 +280,8 @@ export default function SuperAdminPanel() {
         else if (section === 'answered') setConversationFilter('answered');
     };
 
+    const [marketingPanelOpen, setMarketingPanelOpen] = useState(false);
+
     // Makro CRUD fonksiyonları
     const handleAddMacro = (msg) => setMacros(prev => [...prev, msg]);
     const handleEditMacro = (idx, msg) => setMacros(prev => prev.map((m, i) => i === idx ? msg : m));
@@ -292,6 +296,7 @@ export default function SuperAdminPanel() {
                 onSectionChange={handleSectionChange}
                 onOpenMacroModal={() => setMacroModalOpen(true)}
                 onOpenUserPanel={() => setUserPanelOpen(true)}
+                onOpenMarketing={() => setMarketingPanelOpen(true)} // <-- BUNU EKLE!
             />
 
             <div style={{
@@ -334,7 +339,7 @@ export default function SuperAdminPanel() {
                         width: '100%',
                         height: '100%',
                         zIndex: 3000,
-                        background: '#23262b', // opak koyu arka plan
+                        background: '#23262b',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -345,6 +350,28 @@ export default function SuperAdminPanel() {
                     </div>
                 )}
             </div>
+
+
+            {marketingPanelOpen && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: sidebarCollapsed ? 56 : 280,
+                        width: `calc(100% - ${sidebarCollapsed ? 56 : 280}px)`,
+                        height: '100%',
+                        zIndex: 3000,
+                        background: '#23262b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                    }}
+                >
+                    <Marketing onClose={() => setMarketingPanelOpen(false)} />
+                </div>
+            )}
             <MacroModal
                 open={macroModalOpen}
                 onClose={() => setMacroModalOpen(false)}

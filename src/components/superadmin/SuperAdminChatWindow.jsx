@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
+import EndChatModal from '../EndChatModal';
 
 export default function SuperAdminChatWindow({ conversation, onSendMessage, isTakenOver, onTakeOver, onEndChat }) {
     const messagesEndRef = useRef(null);
     const [showEndChatModal, setShowEndChatModal] = useState(false);
-    const [endReason, setEndReason] = useState("");
     const [showEndEndedModal, setShowEndEndedModal] = useState(false);
+    const [endReason, setEndReason] = useState('');
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -13,6 +14,11 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
     useEffect(() => {
         scrollToBottom();
     }, [conversation?.messages]);
+
+    // Conversation değiştiğinde endReason'ı sıfırla
+    useEffect(() => {
+        setEndReason('');
+    }, [conversation?.id]);
 
     if (!conversation) {
         return (
@@ -34,6 +40,11 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
 
     const handleEndChatConfirmed = (reason) => {
         if (conversation && conversation.id) {
+            // Modal seçeneklerini "Kapatıldı" status'una çevir
+            if (reason === 'Sorun Çözüldü' || reason === 'Sohbeti Terk Etti') {
+                // Backend bağlandığında burada status güncellenecek
+                console.log('Sohbet kapatıldı:', reason);
+            }
             onEndChat && onEndChat(conversation.id, reason);
             setShowEndChatModal(false);
             setShowEndEndedModal(true);
@@ -50,13 +61,13 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
             display: 'flex',
             flexDirection: 'column',
             background: '#23262b',
-            maxWidth: 'calc(100% - 650px)'
+            maxWidth: 'calc(100% - 720px)'
         }}>
             {/* Chat Header */}
             <div style={{
                 padding: '12px 15px',
                 borderBottom: '1px solid #333',
-                background: '#1a1d21',
+                background: '#181818',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -81,10 +92,10 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
                 </div>
 
                 <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                    <h3 style={{ margin: 0, color: '#fff', fontSize: '16px', fontWeight: '600' }}>
                         {conversation.name}
                     </h3>
-                    <p style={{ margin: '2px 0 0 0', color: '#888', fontSize: '11px' }}>
+                    <p style={{ margin: '2px 0 0 0', color: '#888', fontSize: '13px' }}>
                         {conversation.platform} • {conversation.agent} • {conversation.status}
                     </p>
                 </div>
@@ -121,83 +132,17 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
                 </div>
             </div>
 
-            {/* Sohbeti Bitir Popup */}
-            {showEndChatModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    background: 'rgba(0,0,0,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000
-                }}>
-                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 340, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
-                        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbeti bitirmek istediğinize emin misiniz?</div>
-                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 14, marginTop: 8 }}>Sohbeti neden bitirmek istiyorsunuz?</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-                            {[
-                                { value: 'Müşterinin sorunu çözüldü', label: 'Müşterinin sorunu çözüldü' },
-                                { value: 'Kullanıcı Sohbeti Terk etti', label: 'Kullanıcı Sohbeti Terk etti' },
-                                { value: 'Başka durumlar', label: 'Başka durumlar' }
-                            ].map(opt => (
-                                <label
-                                    key={opt.value}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', background: endReason === opt.value ? '#275db5' : '#232b36', color: endReason === opt.value ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === opt.value ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38
-                                    }}
-                                >
-                                    {endReason === opt.value && (
-                                        <span style={{
-                                            display: 'inline-block',
-                                            width: 14,
-                                            height: 14,
-                                            borderRadius: '50%',
-                                            background: '#fff',
-                                            border: '3px solid #275db5',
-                                            marginRight: 10
-                                        }} />
-                                    )}
-                                    <input
-                                        type="radio"
-                                        name="endReason"
-                                        value={opt.value}
-                                        checked={endReason === opt.value}
-                                        onChange={e => setEndReason(e.target.value)}
-                                        style={{ display: 'none' }}
-                                    />
-                                    <span style={{ flex: 1, textAlign: 'left' }}>{opt.label}</span>
-                                </label>
-                            ))}
-                        </div>
-                        <button style={{ background: endReason ? '#d64e4e' : '#888', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: endReason ? 'pointer' : 'not-allowed', opacity: endReason ? 1 : 0.7, transition: 'background 0.15s' }} onClick={() => endReason && handleEndChatConfirmed(endReason)} disabled={!endReason}>Evet, Bitir</button>
-                        <button style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowEndChatModal(false)}>Vazgeç</button>
-                    </div>
-                </div>
-            )}
-            {/* Bitirme sonrası popup */}
-            {showEndEndedModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    background: 'rgba(0,0,0,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2100
-                }}>
-                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 340, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
-                        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbet başarıyla sonlandırıldı.</div>
-                        <button style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer', marginTop: 10 }} onClick={handleEndEndedModalClose}>Kapat</button>
-                    </div>
-                </div>
-            )}
+            {/* Sohbeti Bitir Modal */}
+            <EndChatModal
+                isOpen={showEndChatModal}
+                onClose={() => setShowEndChatModal(false)}
+                onConfirm={handleEndChatConfirmed}
+                showEndedModal={showEndEndedModal}
+                onEndedModalClose={handleEndEndedModalClose}
+                endReason={endReason}
+                onEndReasonChange={setEndReason}
+                zIndex={2000}
+            />
 
             {/* Messages */}
             <div style={{
@@ -300,7 +245,7 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
             {/* Message Input ve Devral Butonu */}
             <div style={{
                 background: '#23262b',
-                borderRadius: 5,
+                borderRadius: 3,
                 padding: '16px 16px 12px 16px',
                 marginTop: 0,
                 marginBottom: 0,
@@ -323,7 +268,7 @@ export default function SuperAdminChatWindow({ conversation, onSendMessage, isTa
                                     resize: 'vertical',
                                     border: 'none',
                                     outline: 'none',
-                                    borderRadius: 5,
+                                    borderRadius: 3,
                                     padding: 10,
                                     background: 'transparent',
                                     color: '#fff',

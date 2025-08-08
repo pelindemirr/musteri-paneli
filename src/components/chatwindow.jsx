@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiAlertCircle, FiTrash2, FiChevronDown, FiChevronUp, FiEdit2, FiClock, FiCheckCircle, FiRepeat, FiLock, FiUser, FiSave, FiX } from "react-icons/fi";
 import { FaWhatsapp, FaFacebookMessenger } from "react-icons/fa";
 import { FiMail, FiGlobe, FiMessageCircle } from "react-icons/fi";
+import EndChatModal from './EndChatModal';
 
 // Saat formatlama yardımcı fonksiyonu
 function formatTime(date) {
@@ -17,6 +18,8 @@ const statusIcons = {
     "Yanıtlandı": { icon: <FiCheckCircle style={{ color: '#275db5', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Temsilci yanıt verdi, akış devam ediyor." },
     "Yönlendirildi": { icon: <FiRepeat style={{ color: '#3498db', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Başka temsilciye ya da yöneticiye aktarıldı." },
     "Kapatıldı": { icon: <FiLock style={{ color: '#888', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Sohbet tamamlandı, müşteri teşekkür etti vb." },
+    "Sohbeti Terk Etti": { icon: <FiUser style={{ color: '#e74c3c', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Kullanıcı sohbeti terk etti." },
+    "Sorun Çözüldü": { icon: <FiCheckCircle style={{ color: '#27ae60', fontSize: 16, verticalAlign: 'middle' }} />, tooltip: "Müşterinin sorunu çözüldü." },
 };
 
 const statusOptions = ["Bekliyor", "Yanıtlandı", "Yönlendirildi", "Kapatıldı"];
@@ -42,11 +45,11 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
     const [editStatus, setEditStatus] = useState(false);
     const [showEndChatModal, setShowEndChatModal] = useState(false);
     const [showEndEndedModal, setShowEndEndedModal] = useState(false);
+    const [endReason, setEndReason] = useState('');
     const [oldMessagesMap, setOldMessagesMap] = useState({});
     const [oldBatchMap, setOldBatchMap] = useState({});
     const [oldLoadingMap, setOldLoadingMap] = useState({});
     const messagesEndRef = useRef(null);
-    const [endReason, setEndReason] = useState("");
 
     // eski mesajları görüntüleme / geçmiş sohbetler
     // Tüm eski mesajlar (örnek sahte veri)
@@ -116,6 +119,11 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
         }
     }, [messagesWithKvkk.length]);
 
+    // Conversation değiştiğinde endReason'ı sıfırla
+    useEffect(() => {
+        setEndReason('');
+    }, [conversation?.id]);
+
     const handleReport = () => {
         if (reportReason) {
             alert(`Bildirilen sebep: ${reportReason}`);
@@ -126,8 +134,12 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
 
     const handleEndChatConfirmed = (reason) => {
         if (conversation && conversation.id) {
-            // Bitirme sebebi burada kullanılabilir (ör. backend'e gönderilebilir)
-            // console.log('Bitirme sebebi:', reason);
+            // Modal seçeneklerini "Kapatıldı" status'una çevir
+            if (reason === 'Sorun Çözüldü' || reason === 'Sohbeti Terk Etti') {
+                setStatus('Kapatıldı');
+            } else {
+                setStatus(reason);
+            }
             onEndChat(conversation.id);
             setShowEndChatModal(false);
             setShowEndEndedModal(true);
@@ -136,8 +148,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
 
     const handleEndEndedModalClose = () => {
         setShowEndEndedModal(false);
-        setStatus('Yanıtlandı');
-        // 
+        // Status'u sıfırlama, mevcut status'u koru
     };
 
     // uyarı kutusu
@@ -333,84 +344,17 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                 </div>
             )}
 
-            {showEndChatModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    background: 'rgba(0,0,0,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000
-                }}>
-                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 340, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
-                        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Sohbeti bitirmek istediğinize emin misiniz?</div>
-                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 14, marginTop: 8 }}>Sohbeti neden bitirmek istiyorsunuz?</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-                            {[
-                                { value: 'Müşterinin sorunu çözüldü', label: 'Müşterinin sorunu çözüldü' },
-                                { value: 'Kullanıcı Sohbeti Terk etti', label: 'Kullanıcı Sohbeti Terk etti' },
-                                { value: 'Başka durumlar', label: 'Başka durumlar' }
-                            ].map(opt => (
-                                <label
-                                    key={opt.value}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', background: endReason === opt.value ? '#275db5' : '#232b36', color: endReason === opt.value ? '#fff' : '#b0b0b0', borderRadius: 6, padding: '8px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 14, border: endReason === opt.value ? '1.5px solid #3976e6' : '1px solid #232b36', transition: 'all 0.15s', minHeight: 38
-                                    }}
-                                >
-                                    {/* Sadece seçiliyse ve bu seçeneklerden biriyse dolu daire göster */}
-                                    {endReason === opt.value && (
-                                        <span style={{
-                                            display: 'inline-block',
-                                            width: 14,
-                                            height: 14,
-                                            borderRadius: '50%',
-                                            background: '#fff',
-                                            border: '3px solid #275db5',
-                                            marginRight: 10
-                                        }} />
-                                    )}
-                                    <input
-                                        type="radio"
-                                        name="endReason"
-                                        value={opt.value}
-                                        checked={endReason === opt.value}
-                                        onChange={e => setEndReason(e.target.value)}
-                                        style={{ display: 'none' }}
-                                    />
-                                    <span style={{ flex: 1, textAlign: 'left' }}>{opt.label}</span>
-                                </label>
-                            ))}
-                        </div>
-                        <button style={{ background: endReason ? '#d64e4e' : '#888', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, marginRight: 10, cursor: endReason ? 'pointer' : 'not-allowed', opacity: endReason ? 1 : 0.7, transition: 'background 0.15s' }} onClick={() => endReason && handleEndChatConfirmed(endReason)} disabled={!endReason}>Evet, Bitir</button>
-                        <button style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowEndChatModal(false)}>Vazgeç</button>
-                    </div>
-                </div>
-            )}
-
-            {status === 'Kapatıldı' && showEndEndedModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    background: 'rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 3000
-                }}>
-                    <div style={{ background: '#23262b', color: '#fff', borderRadius: 10, padding: 32, minWidth: 320, boxShadow: '0 4px 24px -8px #000', textAlign: 'center' }}>
-                        <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Sohbet Sonlandırıldı</div>
-                        <div style={{ fontSize: 15, fontWeight: 400, marginBottom: 18 }}>Bu sohbet kapatıldı, yeni mesaj gönderilemez.</div>
-                        <button style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }} onClick={handleEndEndedModalClose}>Tamam</button>
-                    </div>
-                </div>
-            )}
+            {/* Sohbeti Bitir Modal */}
+            <EndChatModal
+                isOpen={showEndChatModal}
+                onClose={() => setShowEndChatModal(false)}
+                onConfirm={handleEndChatConfirmed}
+                showEndedModal={status === 'Kapatıldı' && showEndEndedModal}
+                onEndedModalClose={handleEndEndedModalClose}
+                endReason={endReason}
+                onEndReasonChange={setEndReason}
+                zIndex={2000}
+            />
 
             {/* Mesajlar */}
             <div className="messages-area" style={{
@@ -552,7 +496,7 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
             </div>
 
             {/* Mesaj yazma alanı */}
-            {status === 'Kapatıldı' ? (
+            {status === 'Kapatıldı' || status === 'Sohbeti Terk Etti' || status === 'Sorun Çözüldü' ? (
                 <div style={{
                     background: '#2C2C2C',
                     borderRadius: 8,
@@ -565,7 +509,9 @@ function ChatWindow({ conversation, onEndChat, onStartChat }) {
                     fontWeight: 600,
                     fontSize: 15
                 }}>
-                    Bu sohbet kapatıldı, yeni mesaj gönderilemez.
+                    {status === 'Kapatıldı' && 'Bu sohbet kapatıldı, yeni mesaj gönderilemez.'}
+                    {status === 'Sohbeti Terk Etti' && 'Kullanıcı sohbeti terk etti, yeni mesaj gönderilemez.'}
+                    {status === 'Sorun Çözüldü' && 'Müşterinin sorunu çözüldü, yeni mesaj gönderilemez.'}
                 </div>
             ) : status === 'Yönlendirildi' ? (
                 <div style={{

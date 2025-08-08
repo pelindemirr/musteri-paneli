@@ -44,15 +44,15 @@ export default function MacroModal({ open, onClose, messages, onAdd, onEdit, onD
                     borderTopLeftRadius: 14,
                     borderTopRightRadius: 14,
                 }}>
-                    <h2 style={{ margin: 0, fontSize: 20, color: '#ffb300', fontWeight: 700 }}>Hazır Mesajlar</h2>
+                    <h2 style={{ margin: 0, fontSize: 20, color: '#fffff', fontWeight: 700 }}>Hazır Mesajlar</h2>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', fontWeight: 700 }}>×</button>
                 </div>
                 <div style={{ padding: 24, flex: 1, overflowY: 'auto' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                        <span style={{ fontWeight: 600, fontSize: 16 }}>Makro Listesi</span>
+                        <span style={{ fontWeight: 600, fontSize: 18, background: '#275db5', color: '#fff', padding: '6px 16px', borderRadius: 6 }}>Makro Listesi</span>
                         <button
                             onClick={() => { setIsAdding(true); setNewMsg(""); }}
-                            style={{ background: '#ffb300', color: '#23262b', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
+                            style={{ background: '#275db5', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
                         >+ Yeni Ekle</button>
                     </div>
                     {/* Ekleme alanı */}

@@ -326,7 +326,7 @@ export default function CustomerPanelApp() {
                 <div
                     className="chatlist-panel"
                     style={{
-                        width: sidebarCollapsed ? 380 : 300,
+                        width: sidebarCollapsed ? 450 : 360,
                         transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)',
                     }}
                 >
