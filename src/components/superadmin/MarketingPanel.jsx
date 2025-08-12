@@ -8,8 +8,6 @@ const Marketing = ({ onClose }) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedSegments, setSelectedSegments] = useState(["all"]);
-  const [timing, setTiming] = useState("now");
-  const [scheduledDate, setScheduledDate] = useState("");
 
   const [buttons, setButtons] = useState([]);
 
@@ -18,6 +16,19 @@ const Marketing = ({ onClose }) => {
   const [mediaSampleOpen, setMediaSampleOpen] = useState(false);
   const [selectedVariableType, setSelectedVariableType] = useState("numara");
   const [selectedMediaType, setSelectedMediaType] = useState("resim");
+
+  // Button states
+  const [buttonTypeSelectOpen, setButtonTypeSelectOpen] = useState(false);
+  const [selectedButtonType, setSelectedButtonType] = useState("");
+  const [quickReply, setQuickReply] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [websiteButtonText, setWebsiteButtonText] = useState("Visit website");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneButtonText, setPhoneButtonText] = useState("Call phone number");
+  const [countryCode, setCountryCode] = useState("TR +90");
+  const [offerCode, setOfferCode] = useState("");
+  const [offerButtonText, setOfferButtonText] = useState("Copy offer code");
+  const [showAllButtons, setShowAllButtons] = useState(false);
 
   const handleSegmentToggle = (segment) => {
     setSelectedSegments((prev) =>
@@ -61,9 +72,37 @@ const Marketing = ({ onClose }) => {
   };
   const [footerText, setFooterText] = useState("");
 
-  const [buttonTypeSelectOpen, setButtonTypeSelectOpen] = useState(false);
-  const [selectedButtonType, setSelectedButtonType] = useState("");
-  const [quickReply, setQuickReply] = useState("");
+  // Button addition functions
+  const addButton = (type, data) => {
+    if (buttons.length >= 10) return;
+
+    const newButton = { type, ...data };
+    setButtons([...buttons, newButton]);
+
+    // Reset form fields
+    setQuickReply("");
+    setWebsiteUrl("");
+    setWebsiteButtonText("Visit website");
+    setPhoneNumber("");
+    setPhoneButtonText("Call phone number");
+    setOfferCode("");
+    setOfferButtonText("Copy offer code");
+    setSelectedButtonType("");
+  };
+
+  const removeButton = (index) => {
+    setButtons(buttons.filter((_, i) => i !== index));
+  };
+
+  const countryCodes = [
+    { code: "TR +90", name: "Türkiye" },
+    { code: "US +1", name: "Amerika" },
+    { code: "DE +49", name: "Almanya" },
+    { code: "FR +33", name: "Fransa" },
+    { code: "GB +44", name: "İngiltere" },
+  ];
+
+  const [currentStep, setCurrentStep] = useState(1);
 
   return (
     <div
@@ -111,7 +150,6 @@ const Marketing = ({ onClose }) => {
           border: "1px solid #3a3d44",
         }}
       >
-        {/* Header */}
         <div
           style={{
             padding: "15px 25px",
@@ -474,7 +512,7 @@ const Marketing = ({ onClose }) => {
                 marginTop: "4px",
               }}
             >
-              {campaignName.length}/60
+              {title.length}/60
             </div>
           </div>
 
@@ -494,6 +532,7 @@ const Marketing = ({ onClose }) => {
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
+              placeholder="Mesaj içeriğinizi girin..."
               style={{
                 width: "100%",
                 padding: "12px 16px",
@@ -510,7 +549,7 @@ const Marketing = ({ onClose }) => {
             />
           </div>
 
-          {/* Zamanlama */}
+          {/* Footer */}
           <div style={{ marginBottom: "25px" }}>
             <label
               style={{
@@ -521,234 +560,288 @@ const Marketing = ({ onClose }) => {
                 fontSize: "14px",
               }}
             >
-              Zamanlama
+              Footer (Opsiyonel)
             </label>
-            <div style={{ display: "flex", gap: "20px", marginBottom: "15px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  color: "#ffffff",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="timing"
-                  value="now"
-                  checked={timing === "now"}
-                  onChange={(e) => setTiming(e.target.value)}
-                  style={{ accentColor: "#275db5" }}
-                />
-                Şimdi
-              </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  color: "#ffffff",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="timing"
-                  value="scheduled"
-                  checked={timing === "scheduled"}
-                  onChange={(e) => setTiming(e.target.value)}
-                  style={{ accentColor: "#275db5" }}
-                />
-                Belirli tarih ve saat
-              </label>
-            </div>
             <input
-              type="datetime-local"
-              value={scheduledDate}
-              onChange={(e) => setScheduledDate(e.target.value)}
-              disabled={timing === "now"}
+              type="text"
+              value={footerText}
+              onChange={(e) => setFooterText(e.target.value)}
+              placeholder="Alt bilgi metnini girin"
               style={{
                 width: "100%",
                 padding: "12px 16px",
                 border: "1px solid #3a3d44",
                 borderRadius: "6px",
                 fontSize: "14px",
-                opacity: timing === "now" ? 0.5 : 1,
                 backgroundColor: "#1e2025",
                 color: "#ffffff",
               }}
             />
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#8b8e95",
+                textAlign: "right",
+                marginTop: "4px",
+              }}
+            >
+              {footerText.length}/60
+            </div>
+          </div>
 
-            {/* Footer */}
-            <div style={{ marginBottom: "25px" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#ffffff",
-                  fontWeight: "500",
-                  marginBottom: "8px",
-                  fontSize: "14px",
-                }}
-              >
-                Footer (Opsiyonel)
-              </label>
-              <input
-                type="text"
-                value={footerText}
-                onChange={(e) => setFooterText(e.target.value)}
-                placeholder="Alt bilgi metnini girin"
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
+          {/* --- Butonlar Alanı --- */}
+          <div style={{ marginBottom: "25px", maxWidth: 400 }}>
+            <label
+              style={{
+                color: "#ffffff",
+                fontWeight: "500",
+                fontSize: "14px",
+                display: "block",
+                marginBottom: "8px",
+              }}
+            >
+              Butonlar{" "}
+              <span style={{ color: "#8b8e95", fontWeight: "400" }}>
+                - Opsiyonel
+              </span>
+            </label>
+            <p
+              style={{
+                color: "#8b8e95",
+                fontSize: "12px",
+                margin: "0 0 15px 0",
+                lineHeight: "1.4",
+              }}
+            >
+              Müşterilerinize mesajınıza cevap vermesi veya belirli bir işlem
+              yapması için butonlar eklemenize yarar. En fazla 10 buton
+              eklenebilir. 3'ten fazla buton eklenirse, liste şeklinde görünür.
+            </p>
 
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  backgroundColor: "#1e2025",
-                  color: "#ffffff",
-                }}
-              />
+            {/* Add Button */}
+            <button
+              onClick={() => setButtonTypeSelectOpen(!buttonTypeSelectOpen)}
+              disabled={buttons.length >= 10}
+              style={{
+                padding: "10px 14px",
+                backgroundColor: buttons.length >= 10 ? "#444" : "#275db5",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: buttons.length >= 10 ? "not-allowed" : "pointer",
+                fontSize: "13px",
+                fontWeight: "500",
+                width: "100%",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+            >
+              🔘 + Buton ekle
+            </button>
+
+            {/* Button Type Selection */}
+            {buttonTypeSelectOpen && (
               <div
                 style={{
-                  fontSize: "12px",
-                  color: "#8b8e95",
-                  textAlign: "right",
-                  marginTop: "4px",
+                  background: "#1e2025",
+                  border: "1px solid #3a3d44",
+                  borderRadius: "8px",
+                  marginBottom: "15px",
+                  padding: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
                 }}
               >
-                {footerText.length}/60
-              </div>
-            </div>
-
-            {/*buton*/}
-
-            {/* --- Butonlar Alanı --- */}
-            <div style={{ marginTop: 16, maxWidth: 320, width: "100%" }}>
-              <label style={{ color: "#fff", fontWeight: 500, fontSize: 14 }}>
-                Butonlar{" "}
-                <span style={{ color: "#8b8e95", fontWeight: 400 }}>
-                  (Opsiyonel, en fazla 10)
-                </span>
-              </label>
-              {/* Add Button */}
-              <button
-                onClick={() => setButtonTypeSelectOpen((v) => !v)}
-                disabled={buttons.length >= 10}
-                style={{
-                  marginTop: 8,
-                  padding: "8px 14px",
-                  backgroundColor: "#275db5",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: buttons.length >= 10 ? "not-allowed" : "pointer",
-                  fontSize: 13,
-                  width: "100%",
-                  marginBottom: 8,
-                }}
-              >
-                + Add button
-              </button>
-              {/* Select açılır menü */}
-              {buttonTypeSelectOpen && (
                 <div
                   style={{
-                    background: "#23262b",
-                    border: "1px solid #3a3d44",
-                    borderRadius: 6,
-                    marginBottom: 10,
-                    marginTop: 4,
-                    padding: 8,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    marginBottom: "8px",
                   }}
                 >
-                  <button
-                    style={{
-                      background:
-                        selectedButtonType === "quick" ? "#2d3036" : "none",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "8px 10px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedButtonType("quick");
-                      setButtonTypeSelectOpen(false);
-                    }}
-                  >
-                    Quick Reply
-                  </button>
-                  <button
-                    style={{
-                      background:
-                        selectedButtonType === "website" ? "#2d3036" : "none",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "8px 10px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedButtonType("website");
-                      setButtonTypeSelectOpen(false);
-                    }}
-                  >
-                    Visit Website
-                  </button>
-                  <button
-                    style={{
-                      background:
-                        selectedButtonType === "call" ? "#2d3036" : "none",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "8px 10px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedButtonType("call");
-                      setButtonTypeSelectOpen(false);
-                    }}
-                  >
-                    Call Phone Number
-                  </button>
-                  <button
-                    style={{
-                      background:
-                        selectedButtonType === "copy" ? "#2d3036" : "none",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "8px 10px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedButtonType("copy");
-                      setButtonTypeSelectOpen(false);
-                    }}
-                  >
-                    Copy Offer Code
-                  </button>
+                  Buton türü seçin:
                 </div>
-              )}
 
-              {/* Quick Reply inputu */}
-              {selectedButtonType === "quick" && (
-                <div style={{ marginTop: 8 }}>
+                {/* Custom (Quick Reply) - Her zaman eklenebilir */}
+                <button
+                  style={{
+                    background:
+                      selectedButtonType === "quick"
+                        ? "#2d3036"
+                        : "transparent",
+                    color: "#fff",
+                    border:
+                      selectedButtonType === "quick"
+                        ? "1px solid #4b9fff"
+                        : "1px solid #3a3d44",
+                    borderRadius: "6px",
+                    padding: "10px 12px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    transition: "all 0.2s ease",
+                  }}
+                  onClick={() => setSelectedButtonType("quick")}
+                  onMouseEnter={(e) => {
+                    if (selectedButtonType !== "quick") {
+                      e.currentTarget.style.backgroundColor = "#25272c";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedButtonType !== "quick") {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  <div style={{ fontWeight: "500" }}>Custom</div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#8b8e95",
+                      marginTop: "2px",
+                    }}
+                  >
+                    Hızlı yanıt
+                  </div>
+                </button>
+
+                {/* Diğer buton türleri - Sadece bir kere eklenebilir */}
+                {[
+                  {
+                    id: "website",
+                    label: "Visit Website",
+                    desc: "Web sitesi ziyaret et",
+                  },
+                  {
+                    id: "whatsapp",
+                    label: "Call on WhatsApp",
+                    desc: "WhatsApp üzerinden ara",
+                  },
+                  {
+                    id: "call",
+                    label: "Call Phone Number",
+                    desc: "Telefon numarasını ara",
+                  },
+                  {
+                    id: "copy",
+                    label: "Copy Offer Code",
+                    desc: "Teklif kodunu kopyala",
+                  },
+                ].map((type) => {
+                  const isAlreadyAdded = buttons.some(
+                    (btn) => btn.type === type.id
+                  );
+
+                  return (
+                    <button
+                      key={type.id}
+                      disabled={isAlreadyAdded}
+                      style={{
+                        background:
+                          selectedButtonType === type.id
+                            ? "#2d3036"
+                            : isAlreadyAdded
+                            ? "#1a1d22"
+                            : "transparent",
+                        color: isAlreadyAdded ? "#666" : "#fff",
+                        border:
+                          selectedButtonType === type.id
+                            ? "1px solid #4b9fff"
+                            : "1px solid #3a3d44",
+                        borderRadius: "6px",
+                        padding: "10px 12px",
+                        textAlign: "left",
+                        cursor: isAlreadyAdded ? "not-allowed" : "pointer",
+                        fontSize: "13px",
+                        transition: "all 0.2s ease",
+                        opacity: isAlreadyAdded ? 0.5 : 1,
+                      }}
+                      onClick={() =>
+                        !isAlreadyAdded && setSelectedButtonType(type.id)
+                      }
+                      onMouseEnter={(e) => {
+                        if (selectedButtonType !== type.id && !isAlreadyAdded) {
+                          e.currentTarget.style.backgroundColor = "#25272c";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedButtonType !== type.id && !isAlreadyAdded) {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: "500" }}>
+                        {type.label} {isAlreadyAdded && "(Eklendi)"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: isAlreadyAdded ? "#555" : "#8b8e95",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {type.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Quick Reply Form */}
+            {selectedButtonType === "quick" && (
+              <div
+                style={{
+                  background: "#1e2025",
+                  border: "1px solid #3a3d44",
+                  borderRadius: "8px",
+                  padding: "15px",
+                  marginBottom: "15px",
+                }}
+              >
+                <div style={{ marginBottom: "12px" }}>
                   <label
                     style={{
-                      color: "#fff",
-                      fontSize: 13,
-                      marginBottom: 4,
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "6px",
                       display: "block",
                     }}
                   >
-                    Quick Reply Metni
+                    Tür
+                  </label>
+                  <select
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      backgroundColor: "#25272c",
+                      border: "1px solid #3a3d44",
+                      borderRadius: "6px",
+                      color: "#ffffff",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <option>Custom</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "6px",
+                      display: "block",
+                    }}
+                  >
+                    Buton Metni
                   </label>
                   <input
                     type="text"
@@ -761,156 +854,743 @@ const Marketing = ({ onClose }) => {
                       padding: "8px 12px",
                       borderRadius: "6px",
                       border: "1px solid #3a3d44",
-                      backgroundColor: "#23262b",
+                      backgroundColor: "#25272c",
                       color: "#fff",
-                      fontSize: 13,
+                      fontSize: "13px",
                     }}
                   />
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: "11px",
                       color: "#8b8e95",
                       textAlign: "right",
-                      marginTop: 2,
+                      marginTop: "4px",
                     }}
                   >
-                    {quickReply.length}/25
+                    {websiteButtonText.length}/25
                   </div>
-                  <button
-                    onClick={() => {
-                      if (quickReply.trim()) {
-                        setButtons([
-                          ...buttons,
-                          { type: "quick", text: quickReply.trim() },
-                        ]);
-                        setQuickReply("");
-                        setSelectedButtonType("");
-                      }
-                    }}
-                    disabled={!quickReply.trim() || buttons.length >= 10}
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label
                     style={{
-                      marginTop: 8,
-                      padding: "8px 14px",
-                      backgroundColor: "#275db5",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor:
-                        !quickReply.trim() || buttons.length >= 10
-                          ? "not-allowed"
-                          : "pointer",
-                      fontSize: 13,
-                      width: "100%",
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "6px",
+                      display: "block",
                     }}
                   >
-                    Ekle
-                  </button>
+                    URL Türü
+                  </label>
+                  <select
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      backgroundColor: "#25272c",
+                      border: "1px solid #3a3d44",
+                      borderRadius: "6px",
+                      color: "#ffffff",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <option>Static</option>
+                  </select>
                 </div>
-              )}
 
-              {/* Eklenen butonlar listesi */}
-              <div style={{ marginTop: 10 }}>
-                {(buttons.length <= 3 ? buttons : buttons.slice(0, 3)).map(
-                  (btn, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        background: "#23262b",
-                        color: "#fff",
-                        borderRadius: 6,
-                        padding: "8px 12px",
-                        marginBottom: 6,
-                        fontSize: 13,
-                        border: "1px solid #3a3d44",
-                        maxWidth: 320,
-                        width: "100%",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {btn.type === "quick" ? "↩️ " : ""}
-                      {btn.text}
-                    </div>
-                  )
-                )}
-                {buttons.length > 3 && (
+                <div style={{ marginBottom: "12px" }}>
+                  <label
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "6px",
+                      display: "block",
+                    }}
+                  >
+                    Website URL
+                  </label>
+                  <input
+                    type="url"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    placeholder="https://www.example.com"
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid #3a3d44",
+                      backgroundColor: "#25272c",
+                      color: "#fff",
+                      fontSize: "13px",
+                    }}
+                  />
                   <div
                     style={{
-                      color: "#275db5",
-                      fontSize: 13,
-                      cursor: "pointer",
-                      marginTop: 4,
-                      textAlign: "center",
-                      background: "#23262b",
-                      borderRadius: 6,
-                      padding: "8px 0",
-                      border: "1px solid #3a3d44",
-                      maxWidth: 320,
-                      width: "100%",
+                      fontSize: "11px",
+                      color: "#8b8e95",
+                      marginTop: "4px",
                     }}
                   >
-                    Tümünü Gör ({buttons.length})
+                    0/2000
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Action Buttons */}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "flex-end",
-                padding: "15px 25px",
-                borderTop: "1px solid #3a3d44",
-                backgroundColor: "#1a1d22",
-              }}
-            >
-              <button
-                onClick={handleSave}
+                <div
+                  style={{
+                    background: "#2a2f35",
+                    padding: "8px 10px",
+                    borderRadius: "4px",
+                    marginBottom: "12px",
+                    fontSize: "11px",
+                    color: "#8b8e95",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  ℹ️ Track app conversions (Marketing Messages Lite API only)
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (websiteUrl.trim() && websiteButtonText.trim()) {
+                      addButton("website", {
+                        text: websiteButtonText.trim(),
+                        url: websiteUrl.trim(),
+                      });
+                    }
+                  }}
+                  disabled={
+                    !websiteUrl.trim() ||
+                    !websiteButtonText.trim() ||
+                    buttons.length >= 10
+                  }
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor:
+                      !websiteUrl.trim() ||
+                      !websiteButtonText.trim() ||
+                      buttons.length >= 10
+                        ? "#444"
+                        : "#275db5",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor:
+                      !websiteUrl.trim() ||
+                      !websiteButtonText.trim() ||
+                      buttons.length >= 10
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "13px",
+                    width: "100%",
+                  }}
+                >
+                  Ekle
+                </button>
+              </div>
+            )}
+
+            {/* Phone Call Form */}
+            {selectedButtonType === "call" && (
+              <div
                 style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#2c2f36",
-                  color: "#ffffff",
+                  background: "#1e2025",
                   border: "1px solid #3a3d44",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "13px",
+                  borderRadius: "8px",
+                  padding: "15px",
+                  marginBottom: "15px",
                 }}
               >
-                Kaydet
-              </button>
-              <button
-                onClick={handleTestSend}
+                <div style={{ marginBottom: "15px" }}>
+                  <label
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "8px",
+                      display: "block",
+                    }}
+                  >
+                    Call to Action • Opsiyonel
+                  </label>
+                </div>
+
+                {/* İlk satır - Yatay Layout */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    marginBottom: "12px",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div style={{ flex: "0 0 140px" }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Type of Action
+                    </label>
+                    <select
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        backgroundColor: "#25272c",
+                        border: "1px solid #3a3d44",
+                        borderRadius: "6px",
+                        color: "#ffffff",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <option>Call phone number</option>
+                    </select>
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={phoneButtonText}
+                      maxLength={25}
+                      onChange={(e) => setPhoneButtonText(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid #3a3d44",
+                        backgroundColor: "#25272c",
+                        color: "#fff",
+                        fontSize: "13px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#8b8e95",
+                        textAlign: "right",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {phoneButtonText.length}/25
+                    </div>
+                  </div>
+                </div>
+
+                {/* İkinci satır - Yatay Layout */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    marginBottom: "12px",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div style={{ flex: "0 0 140px" }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Country
+                    </label>
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        backgroundColor: "#25272c",
+                        border: "1px solid #3a3d44",
+                        borderRadius: "6px",
+                        color: "#ffffff",
+                        fontSize: "13px",
+                      }}
+                    >
+                      {countryCodes.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.code.split(" ")[1]}{" "}
+                          {country.code.split(" ")[0]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Phone number
+                    </label>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Geçerli bir telefon numarası girin"
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border:
+                          phoneNumber &&
+                          !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
+                            ? "1px solid #d64e4e"
+                            : "1px solid #3a3d44",
+                        backgroundColor: "#25272c",
+                        color: "#fff",
+                        fontSize: "13px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color:
+                          phoneNumber &&
+                          !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
+                            ? "#d64e4e"
+                            : "#8b8e95",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {phoneNumber &&
+                      !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
+                        ? "⚠️ You need to enter a phone number. Please add a valid phone number."
+                        : "0/20"}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (
+                      phoneNumber.trim() &&
+                      phoneButtonText.trim() &&
+                      /^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
+                    ) {
+                      addButton("call", {
+                        text: phoneButtonText.trim(),
+                        phone: phoneNumber.trim(),
+                        country: countryCode,
+                      });
+                    }
+                  }}
+                  disabled={
+                    !phoneNumber.trim() ||
+                    !phoneButtonText.trim() ||
+                    !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
+                    buttons.length >= 10
+                  }
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor:
+                      !phoneNumber.trim() ||
+                      !phoneButtonText.trim() ||
+                      !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
+                      buttons.length >= 10
+                        ? "#444"
+                        : "#275db5",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor:
+                      !phoneNumber.trim() ||
+                      !phoneButtonText.trim() ||
+                      !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
+                      buttons.length >= 10
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "13px",
+                    width: "100%",
+                  }}
+                >
+                  Ekle
+                </button>
+              </div>
+            )}
+
+            {/* Offer Code Form */}
+            {selectedButtonType === "copy" && (
+              <div
                 style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#2c2f36",
-                  color: "#ffffff",
+                  background: "#1e2025",
                   border: "1px solid #3a3d44",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "13px",
+                  borderRadius: "8px",
+                  padding: "15px",
+                  marginBottom: "15px",
                 }}
               >
-                Test Gönder
-              </button>
-              <button
-                onClick={handleStartCampaign}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#275db5",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                }}
-              >
-                Kampanyayı Başlat
-              </button>
-            </div>
+                <div style={{ marginBottom: "15px" }}>
+                  <label
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      marginBottom: "8px",
+                      display: "block",
+                    }}
+                  >
+                    Call to Action • Opsiyonel
+                  </label>
+                </div>
+
+                {/* İlk satır - Yatay Layout */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    marginBottom: "12px",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div style={{ flex: "0 0 140px" }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Type of Action
+                    </label>
+                    <select
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        backgroundColor: "#25272c",
+                        border: "1px solid #3a3d44",
+                        borderRadius: "6px",
+                        color: "#ffffff",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <option>Copy offer code</option>
+                    </select>
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        marginBottom: "4px",
+                        display: "block",
+                      }}
+                    >
+                      Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={offerButtonText}
+                      maxLength={25}
+                      onChange={(e) => setOfferButtonText(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid #3a3d44",
+                        backgroundColor: "#25272c",
+                        color: "#fff",
+                        fontSize: "13px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#8b8e95",
+                        textAlign: "right",
+                        marginTop: "2px",
+                      }}
+                    >
+                      {offerButtonText.length}/25
+                    </div>
+                  </div>
+                </div>
+
+                {/* İkinci satır - Offer Code */}
+                <div style={{ marginBottom: "12px" }}>
+                  <label
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "13px",
+                      marginBottom: "4px",
+                      display: "block",
+                    }}
+                  >
+                    Offer code
+                  </label>
+                  <input
+                    type="text"
+                    value={offerCode}
+                    maxLength={15}
+                    onChange={(e) => setOfferCode(e.target.value)}
+                    placeholder="Enter sample text"
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid #3a3d44",
+                      backgroundColor: "#25272c",
+                      color: "#fff",
+                      fontSize: "13px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: "2px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#8b8e95",
+                      }}
+                    >
+                      Add sample text
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#8b8e95",
+                      }}
+                    >
+                      {offerCode.length}/15
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (offerCode.trim() && offerButtonText.trim()) {
+                      addButton("copy", {
+                        text: offerButtonText.trim(),
+                        code: offerCode.trim(),
+                      });
+                    }
+                  }}
+                  disabled={
+                    !offerCode.trim() ||
+                    !offerButtonText.trim() ||
+                    buttons.length >= 10
+                  }
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor:
+                      !offerCode.trim() ||
+                      !offerButtonText.trim() ||
+                      buttons.length >= 10
+                        ? "#444"
+                        : "#275db5",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor:
+                      !offerCode.trim() ||
+                      !offerButtonText.trim() ||
+                      buttons.length >= 10
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "13px",
+                    width: "100%",
+                  }}
+                >
+                  Ekle
+                </button>
+              </div>
+            )}
+
+            {/* Added Buttons List */}
+            {buttons.length > 0 && (
+              <div style={{ marginTop: "15px" }}>
+                <div
+                  style={{
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    marginBottom: "10px",
+                  }}
+                >
+                  Eklenen Butonlar ({buttons.length}/10):
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {(showAllButtons ? buttons : buttons.slice(0, 3)).map(
+                    (btn, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          background: "#23262b",
+                          color: "#fff",
+                          borderRadius: "6px",
+                          padding: "10px 12px",
+                          fontSize: "13px",
+                          border: "1px solid #3a3d44",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div style={{ flex: 1, overflow: "hidden" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              marginBottom: "2px",
+                            }}
+                          >
+                            {btn.type === "quick" && <span>↩️</span>}
+                            {btn.type === "website" && <span>🌐</span>}
+                            {btn.type === "whatsapp" && <span>📞</span>}
+                            {btn.type === "call" && <span>☎️</span>}
+                            {btn.type === "copy" && <span>📋</span>}
+                            <span style={{ fontWeight: "500" }}>
+                              {btn.text}
+                            </span>
+                          </div>
+                          {btn.url && (
+                            <div style={{ fontSize: "11px", color: "#8b8e95" }}>
+                              {btn.url}
+                            </div>
+                          )}
+                          {btn.phone && (
+                            <div style={{ fontSize: "11px", color: "#8b8e95" }}>
+                              {btn.country} {btn.phone}
+                            </div>
+                          )}
+                          {btn.code && (
+                            <div style={{ fontSize: "11px", color: "#8b8e95" }}>
+                              Kod: {btn.code}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => removeButton(i)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#d64e4e",
+                            cursor: "pointer",
+                            fontSize: "16px",
+                            padding: "4px",
+                            marginLeft: "8px",
+                          }}
+                          title="Butonu sil"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )
+                  )}
+
+                  {buttons.length > 3 && (
+                    <button
+                      onClick={() => setShowAllButtons(!showAllButtons)}
+                      style={{
+                        color: "#275db5",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        background: "#23262b",
+                        borderRadius: "6px",
+                        padding: "10px 0",
+                        border: "1px solid #3a3d44",
+                        textAlign: "center",
+                      }}
+                    >
+                      {showAllButtons
+                        ? "Daha az göster"
+                        : `Tümünü Gör (${buttons.length})`}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            justifyContent: "flex-end",
+            padding: "15px 25px",
+            borderTop: "1px solid #3a3d44",
+            backgroundColor: "#1a1d22",
+          }}
+        >
+          <button
+            onClick={handleSave}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#2c2f36",
+              color: "#ffffff",
+              border: "1px solid #3a3d44",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
+          >
+            Kaydet
+          </button>
+          <button
+            onClick={handleTestSend}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#2c2f36",
+              color: "#ffffff",
+              border: "1px solid #3a3d44",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
+          >
+            Test Gönder
+          </button>
+          <button
+            onClick={handleStartCampaign}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#275db5",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
+          >
+            Kampanyayı Başlat
+          </button>
         </div>
       </div>
 
@@ -941,8 +1621,17 @@ const Marketing = ({ onClose }) => {
               margin: 0,
             }}
           >
-            Kampanya Önizlemesi
+            Template Preview
           </h2>
+          <p
+            style={{
+              color: "#8b8e95",
+              fontSize: "12px",
+              margin: "4px 0 0 0",
+            }}
+          >
+            Şablon Önizlemesi
+          </p>
         </div>
         <div style={{ padding: "20px" }}>
           {/* WhatsApp Tarzı Mesaj Balonu */}
@@ -962,15 +1651,16 @@ const Marketing = ({ onClose }) => {
             <div
               style={{
                 alignSelf: "flex-end",
-                maxWidth: "80%",
-                backgroundColor: "#128c7e",
+                maxWidth: "85%",
+                backgroundColor: "#25d366",
                 borderRadius: "18px 18px 4px 18px",
                 padding: "12px 16px",
                 marginBottom: "8px",
-                wordBreak: "break-word", // ❗️ Uzun kelimeler taşmasın
+                wordBreak: "break-word",
                 whiteSpace: "pre-wrap",
               }}
             >
+              {/* Header */}
               {title && (
                 <div
                   style={{
@@ -983,6 +1673,8 @@ const Marketing = ({ onClose }) => {
                   {title}
                 </div>
               )}
+
+              {/* Body */}
               <div
                 style={{
                   color: "#ffffff",
@@ -992,7 +1684,8 @@ const Marketing = ({ onClose }) => {
               >
                 {getPreviewContent()}
               </div>
-              {/* ✅ Footer Metni Buraya Ekleniyor */}
+
+              {/* Footer */}
               {footerText && (
                 <div
                   style={{
@@ -1015,62 +1708,98 @@ const Marketing = ({ onClose }) => {
                   color: "#b8d3d1",
                 }}
               >
-                10:30 ✓✓
+                14:30 ✓✓
               </div>
             </div>
+
+            {/* Butonlar Önizlemesi */}
             {buttons.length > 0 && (
               <div
                 style={{
-                  marginTop: 12,
+                  marginTop: "12px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 6,
+                  gap: "6px",
+                  alignSelf: "flex-end",
+                  maxWidth: "85%",
+                  width: "100%",
                 }}
               >
                 {(buttons.length <= 3 ? buttons : buttons.slice(0, 3)).map(
-                  (btn, i) => (
-                    <button
-                      key={i}
-                      style={{
-                        background: btn.type === "quick" ? "#fff" : "#e6f0fa",
-                        color: btn.type === "quick" ? "#275db5" : "#1a202c",
-                        border: "none",
-                        borderRadius: 6,
-                        padding: "8px 12px",
-                        fontSize: 13,
-                        textAlign: "left",
-                        cursor: "pointer",
-                        width: "100%",
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                      disabled
-                    >
-                      {btn.type === "quick" && (
-                        <span style={{ fontSize: 16 }}>↩️</span>
-                      )}
-                      {btn.text}
-                    </button>
-                  )
+                  (btn, i) => {
+                    let icon = "";
+                    let bgColor = "#ffffff";
+                    let textColor = "#1a202c";
+
+                    if (btn.type === "quick") {
+                      icon = "↩️ ";
+                      bgColor = "#e8f5e8";
+                      textColor = "#0d7377";
+                    } else if (btn.type === "website") {
+                      icon = "🌐 ";
+                      bgColor = "#e6f0fa";
+                      textColor = "#275db5";
+                    } else if (btn.type === "whatsapp") {
+                      icon = "📞 ";
+                      bgColor = "#dcf8c6";
+                      textColor = "#25d366";
+                    } else if (btn.type === "call") {
+                      icon = "☎️ ";
+                      bgColor = "#fff3e0";
+                      textColor = "#e65100";
+                    } else if (btn.type === "copy") {
+                      icon = "📋 ";
+                      bgColor = "#f3e5f5";
+                      textColor = "#7b1fa2";
+                    }
+
+                    return (
+                      <button
+                        key={i}
+                        style={{
+                          background: bgColor,
+                          color: textColor,
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px 12px",
+                          fontSize: "13px",
+                          fontWeight: "500",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          width: "100%",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          transition: "all 0.2s ease",
+                        }}
+                        disabled
+                      >
+                        <span>{icon}</span>
+                        <span>{btn.text}</span>
+                      </button>
+                    );
+                  }
                 )}
+
                 {buttons.length > 3 && (
-                  <div
+                  <button
                     style={{
                       color: "#275db5",
-                      fontSize: 13,
-                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      background: "#ffffff",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                      border: "1px solid #e0e0e0",
                       textAlign: "center",
-                      background: "#fff",
-                      borderRadius: 6,
-                      padding: "8px 0",
-                      border: "1px solid #b8d3d1",
-                      marginTop: 2,
+                      cursor: "pointer",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                     }}
+                    disabled
                   >
-                    See all options
-                  </div>
+                    🔽 See all options
+                  </button>
                 )}
               </div>
             )}
@@ -1083,7 +1812,7 @@ const Marketing = ({ onClose }) => {
                 backgroundColor: "#2a2a2a",
                 borderRadius: "18px 18px 18px 4px",
                 padding: "10px 14px",
-                marginTop: "4px",
+                marginTop: "8px",
               }}
             >
               <div
@@ -1103,7 +1832,7 @@ const Marketing = ({ onClose }) => {
                   color: "#8b8e95",
                 }}
               >
-                10:31
+                14:31
               </div>
             </div>
           </div>
