@@ -11,6 +11,8 @@ import copyIcon from "../../assets/Marketing/copy.svg";
 import campaignIcon from "../../assets/Marketing/campaign.svg";
 import customIcon from "../../assets/Marketing/custom.svg";
 import KonumIcon from "../../assets/Marketing/konum.svg";
+import websiteIcon from "../../assets/Marketing/website.png";
+import whatsappIcon from "../../assets/Marketing/whatsapp.png";
 
 const Marketing = ({ onClose }) => {
   const [campaignName, setCampaignName] = useState("");
@@ -174,7 +176,7 @@ const Marketing = ({ onClose }) => {
               style={{
                 width: "40px",
                 height: "40px",
-                backgroundColor: "#275db5",
+
                 borderRadius: "6px",
                 display: "flex",
                 alignItems: "center",
@@ -182,7 +184,14 @@ const Marketing = ({ onClose }) => {
                 fontSize: "18px",
               }}
             >
-              📧
+              <img
+                src={campaignIcon}
+                alt="Campaign Icon"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                }}
+              />
             </div>
             <div>
               <h1
@@ -199,7 +208,7 @@ const Marketing = ({ onClose }) => {
                 style={{
                   color: "#8b8e95",
                   fontSize: "14px",
-                  margin: "4px 0 0 0",
+                  margin: "3px 0 0 0",
                 }}
               >
                 {currentStep === 1 ? "Adım 1/2" : "Adım 2/2"}
@@ -1089,57 +1098,116 @@ const Marketing = ({ onClose }) => {
                     }}
                   >
                     {[
-                      { id: "resim", label: " Resim" },
-                      { id: "video", label: " Video" },
-                      { id: "dokuman", label: " Doküman" },
-                      { id: "konum", label: " Konum" },
-                    ].map((media) => (
-                      <label
-                        key={media.id}
-                        style={{
-                          backgroundColor:
-                            selectedMediaType === media.id
-                              ? "#2d3036"
-                              : "#25272c",
-                          border:
-                            selectedMediaType === media.id
-                              ? "1px solid #4b9fff"
-                              : "1px solid #3a3d44",
-                          padding: "10px 12px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          cursor: "pointer",
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#2d3036";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (selectedMediaType !== media.id) {
-                            e.currentTarget.style.backgroundColor = "#25272c";
-                          }
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="mediaType"
-                          value={media.id}
-                          checked={selectedMediaType === media.id}
-                          onChange={(e) => setSelectedMediaType(e.target.value)}
+                      { id: "resim", label: "Resim", icon: imageIcon },
+                      { id: "video", label: "Video", icon: videoIcon },
+                      { id: "dokuman", label: "Doküman", icon: documentIcon },
+                      { id: "konum", label: "Konum", icon: KonumIcon },
+                    ].map((media) => {
+                      const isSelected = selectedMediaType === media.id;
+
+                      // Stilleri seçili/seçili değil durumuna göre hesaplıyoruz
+                      const baseBg = isSelected
+                        ? "linear-gradient(180deg, #2b2f36 0%, #23262c 100%)"
+                        : "#25272c";
+
+                      const borderColor = isSelected ? "#4b9fff" : "#3a3d44";
+
+                      const boxShadow = isSelected
+                        ? "0 0 0 1px rgba(75,159,255,0.35) inset, 0 6px 18px rgba(0,0,0,0.35)"
+                        : "0 2px 8px rgba(0,0,0,0.25)";
+
+                      return (
+                        <label
+                          key={media.id}
                           style={{
-                            accentColor: "#275db5",
-                            width: "10px",
-                            height: "10px",
+                            position: "relative",
+                            background: baseBg,
+                            border: `1px solid ${borderColor}`,
+                            padding: "10px 12px",
+                            borderRadius: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
                             cursor: "pointer",
+                            color: "#ffffff",
+                            fontSize: "13px",
+                            transition:
+                              "transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, border-color 0.2s ease",
+                            boxShadow,
                           }}
-                        />
-                        {media.label}
-                      </label>
-                    ))}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-1px)";
+                            e.currentTarget.style.boxShadow = isSelected
+                              ? "0 0 0 1px rgba(75,159,255,0.45) inset, 0 10px 22px rgba(0,0,0,0.4)"
+                              : "0 6px 14px rgba(0,0,0,0.35)";
+                            // hover’da arka planı hafif aydınlat
+                            if (!isSelected) {
+                              e.currentTarget.style.background = "#2d3036";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = boxShadow;
+                            if (!isSelected) {
+                              e.currentTarget.style.background = "#25272c";
+                            }
+                          }}
+                        >
+                          {/* Sol vurgu şeridi (yalnızca seçiliyken görünür) */}
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              position: "absolute",
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              width: isSelected ? "3px" : "0px",
+                              background:
+                                "linear-gradient(180deg, rgba(75,159,255,1) 0%, rgba(75,159,255,0.2) 100%)",
+                              borderTopLeftRadius: "10px",
+                              borderBottomLeftRadius: "10px",
+                              transition: "width 0.2s ease",
+                            }}
+                          />
+
+                          <input
+                            type="radio"
+                            name="mediaType"
+                            value={media.id}
+                            checked={isSelected}
+                            onChange={(e) =>
+                              setSelectedMediaType(e.target.value)
+                            }
+                            style={{
+                              accentColor: "#275db5",
+                              width: "12px",
+                              height: "12px",
+                              cursor: "pointer",
+                              flex: "0 0 auto",
+                            }}
+                          />
+
+                          {/* SVG İkon (aynen korunur) */}
+                          <img
+                            src={media.icon}
+                            alt={media.label}
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              // SVG’lerin görünümünü bozmamak için mevcut filter neyse koru:
+                              filter: "brightness(0) invert(1)",
+                              flex: "0 0 auto",
+                            }}
+                          />
+
+                          {/* Metin */}
+                          <span style={{ flex: 1, userSelect: "none" }}>
+                            {media.label}
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1184,7 +1252,6 @@ const Marketing = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Mesaj İçeriği */}
               {/* Mesaj İçeriği */}
               <div style={{ marginBottom: "20px" }}>
                 <label
@@ -1473,199 +1540,215 @@ const Marketing = ({ onClose }) => {
                   buton eklenebilir. 3'ten fazla buton eklenirse, liste şeklinde
                   görünür.
                 </p>
-
-                {/* Add Button */}
-                <button
-                  onClick={() => setButtonTypeSelectOpen(!buttonTypeSelectOpen)}
-                  disabled={buttons.length >= 10}
+                {/* Add Button + Dropdown */}
+                <div
                   style={{
-                    padding: "10px 14px",
-                    backgroundColor: buttons.length >= 10 ? "#444" : "#275db5",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: buttons.length >= 10 ? "not-allowed" : "pointer",
-                    fontSize: "13px",
-                    fontWeight: "500",
                     width: "50%",
-                    marginBottom: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
+                    position: "relative",
+                    marginBottom: "20px",
                   }}
                 >
-                  + Buton ekle
-                </button>
-
-                {/* Buton Türü Dropdown */}
-                {buttonTypeSelectOpen && (
-                  <div
+                  {/* Add Button */}
+                  <button
+                    onClick={() =>
+                      setButtonTypeSelectOpen(!buttonTypeSelectOpen)
+                    }
+                    disabled={buttons.length >= 10}
                     style={{
-                      position: "relative",
+                      padding: "10px 14px",
+                      backgroundColor:
+                        buttons.length >= 10 ? "#444" : "#275db5",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: buttons.length >= 10 ? "not-allowed" : "pointer",
+                      fontSize: "13px",
+                      fontWeight: "500",
                       width: "100%",
-                      maxWidth: 320,
-                      marginBottom: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
                     }}
                   >
+                    + Buton ekle
+                  </button>
+
+                  {/* Buton Türü Dropdown */}
+                  {buttonTypeSelectOpen && (
                     <div
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                        padding: "12px",
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
-                        borderRadius: "6px",
+                        position: "absolute",
+                        top: "calc(100% + 6px)", // Butonun hemen altı
+                        left: 0,
+                        width: "100%",
+                        transition: "all 0.25s ease",
+                        opacity: buttonTypeSelectOpen ? 1 : 0,
+                        transform: buttonTypeSelectOpen
+                          ? "translateY(0)"
+                          : "translateY(-6px)",
+                        zIndex: 10,
                       }}
                     >
-                      {/* Custom Button */}
-                      <button
+                      <div
                         style={{
-                          background:
-                            selectedButtonType === "quick"
-                              ? "#2d3036"
-                              : "transparent",
-                          color: "#fff",
-                          border:
-                            selectedButtonType === "quick"
-                              ? "1px solid #4b9fff"
-                              : "1px solid #3a3d44",
-                          borderRadius: "6px",
-                          padding: "10px 12px",
-                          textAlign: "left",
-                          cursor: "pointer",
-                          fontSize: "13px",
                           display: "flex",
-                          alignItems: "center",
+                          flexDirection: "column",
                           gap: "8px",
-                        }}
-                        onClick={() => {
-                          setSelectedButtonType("quick");
-                          setButtonTypeSelectOpen(false);
+                          padding: "12px",
+                          backgroundColor: "#1e2025",
+                          border: "1px solid #3a3d44",
+                          borderRadius: "6px",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.25)", // Açıldığında hafif gölge
                         }}
                       >
-                        <img
-                          src={customIcon}
-                          alt="Custom"
+                        {/* Custom Button */}
+                        <button
                           style={{
-                            width: "16px",
-                            height: "16px",
-                            filter: "brightness(0) invert(1)",
+                            background:
+                              selectedButtonType === "quick"
+                                ? "#2d3036"
+                                : "transparent",
+                            color: "#fff",
+                            border:
+                              selectedButtonType === "quick"
+                                ? "1px solid #4b9fff"
+                                : "1px solid #3a3d44",
+                            borderRadius: "6px",
+                            padding: "10px 12px",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
                           }}
-                        />
-                        <div>
-                          <div style={{ fontWeight: "500" }}>Custom</div>
-                          <div
+                          onClick={() => {
+                            setSelectedButtonType("quick");
+                            setButtonTypeSelectOpen(false);
+                          }}
+                        >
+                          <img
+                            src={customIcon}
+                            alt="Custom"
                             style={{
-                              fontSize: "11px",
-                              color: "#8b8e95",
-                              marginTop: "2px",
+                              width: "16px",
+                              height: "16px",
+                              filter: "brightness(0) invert(1)",
                             }}
-                          >
-                            Hızlı yanıt
-                          </div>
-                        </div>
-                      </button>
-
-                      {/* Diğer buton türleri */}
-                      {[
-                        {
-                          id: "website",
-                          label: "Visit Website",
-                          desc: "Web sitesi ziyaret et",
-                          icon: "/assets/Marketing/website.svg", // Doğru SVG yolunu buraya koyun
-                        },
-                        {
-                          id: "whatsapp",
-                          label: "Call on WhatsApp",
-                          desc: "WhatsApp üzerinden ara",
-                          icon: phoneIcon,
-                        },
-                        {
-                          id: "call",
-                          label: "Call Phone Number",
-                          desc: "Telefon numarasını ara",
-                          icon: phoneIcon,
-                        },
-                        {
-                          id: "copy",
-                          label: "Copy Offer Code",
-                          desc: "Teklif kodunu kopyala",
-                          icon: copyIcon,
-                        },
-                      ].map((type) => {
-                        const isAlreadyAdded = buttons.some(
-                          (btn) => btn.type === type.id
-                        );
-
-                        return (
-                          <button
-                            key={type.id}
-                            disabled={isAlreadyAdded}
-                            style={{
-                              background:
-                                selectedButtonType === type.id
-                                  ? "#2d3036"
-                                  : isAlreadyAdded
-                                  ? "#1a1d22"
-                                  : "transparent",
-                              color: isAlreadyAdded ? "#666" : "#fff",
-                              border:
-                                selectedButtonType === type.id
-                                  ? "1px solid #4b9fff"
-                                  : "1px solid #3a3d44",
-                              borderRadius: "6px",
-                              padding: "10px 12px",
-                              textAlign: "left",
-                              cursor: isAlreadyAdded
-                                ? "not-allowed"
-                                : "pointer",
-                              fontSize: "13px",
-                              opacity: isAlreadyAdded ? 0.5 : 1,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                            onClick={() => {
-                              if (!isAlreadyAdded) {
-                                setSelectedButtonType(type.id);
-                                setButtonTypeSelectOpen(false);
-                              }
-                            }}
-                          >
-                            <img
-                              src={type.icon}
-                              alt={type.label}
+                          />
+                          <div>
+                            <div style={{ fontWeight: "500" }}>Custom</div>
+                            <div
                               style={{
-                                width: "16px",
-                                height: "16px",
-                                filter: isAlreadyAdded
-                                  ? "brightness(0.3)"
-                                  : "brightness(0) invert(1)",
+                                fontSize: "11px",
+                                color: "#8b8e95",
+                                marginTop: "2px",
                               }}
-                            />
-                            <div>
-                              <div style={{ fontWeight: "500" }}>
-                                {type.label} {isAlreadyAdded && "(Eklendi)"}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                  color: isAlreadyAdded ? "#555" : "#8b8e95",
-                                  marginTop: "2px",
-                                }}
-                              >
-                                {type.desc}
-                              </div>
+                            >
+                              Hızlı yanıt
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                          </div>
+                        </button>
 
+                        {/* Diğer buton türleri */}
+                        {[
+                          {
+                            id: "website",
+                            label: "Visit Website",
+                            desc: "Web sitesi ziyaret et",
+                            icon: websiteIcon,
+                          },
+                          {
+                            id: "whatsapp",
+                            label: "Call on WhatsApp",
+                            desc: "WhatsApp üzerinden ara",
+                            icon: phoneIcon,
+                          },
+                          {
+                            id: "call",
+                            label: "Call Phone Number",
+                            desc: "Telefon numarasını ara",
+                            icon: phoneIcon,
+                          },
+                          {
+                            id: "copy",
+                            label: "Copy Offer Code",
+                            desc: "Teklif kodunu kopyala",
+                            icon: copyIcon,
+                          },
+                        ].map((type) => {
+                          const isAlreadyAdded = buttons.some(
+                            (btn) => btn.type === type.id
+                          );
+
+                          return (
+                            <button
+                              key={type.id}
+                              disabled={isAlreadyAdded}
+                              style={{
+                                background:
+                                  selectedButtonType === type.id
+                                    ? "#2d3036"
+                                    : isAlreadyAdded
+                                    ? "#1a1d22"
+                                    : "transparent",
+                                color: isAlreadyAdded ? "#666" : "#fff",
+                                border:
+                                  selectedButtonType === type.id
+                                    ? "1px solid #4b9fff"
+                                    : "1px solid #3a3d44",
+                                borderRadius: "6px",
+                                padding: "10px 12px",
+                                textAlign: "left",
+                                cursor: isAlreadyAdded
+                                  ? "not-allowed"
+                                  : "pointer",
+                                fontSize: "13px",
+                                opacity: isAlreadyAdded ? 0.5 : 1,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                              onClick={() => {
+                                if (!isAlreadyAdded) {
+                                  setSelectedButtonType(type.id);
+                                  setButtonTypeSelectOpen(false);
+                                }
+                              }}
+                            >
+                              <img
+                                src={type.icon}
+                                alt={type.label}
+                                style={{
+                                  width: "16px",
+                                  height: "16px",
+                                  filter: isAlreadyAdded
+                                    ? "brightness(0.3)"
+                                    : "brightness(0) invert(1)",
+                                }}
+                              />
+                              <div>
+                                <div style={{ fontWeight: "500" }}>
+                                  {type.label} {isAlreadyAdded && "(Eklendi)"}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: "11px",
+                                    color: isAlreadyAdded ? "#555" : "#8b8e95",
+                                    marginTop: "2px",
+                                  }}
+                                >
+                                  {type.desc}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {/* Quick Reply Form */}
                 {selectedButtonType === "quick" && (
                   <div
@@ -1789,7 +1872,7 @@ const Marketing = ({ onClose }) => {
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
+                        gridTemplateColumns: "140px 1fr",
                         gap: "12px",
                         marginBottom: "12px",
                       }}
@@ -1799,12 +1882,11 @@ const Marketing = ({ onClose }) => {
                           style={{
                             color: "#ffffff",
                             fontSize: "13px",
-                            fontWeight: "500",
-                            marginBottom: "6px",
+                            marginBottom: "4px",
                             display: "block",
                           }}
                         >
-                          Tür
+                          Type of Action
                         </label>
                         <select
                           style={{
@@ -1817,7 +1899,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "13px",
                           }}
                         >
-                          <option>Static</option>
+                          <option>Visit website</option>
                         </select>
                       </div>
 
@@ -1826,12 +1908,11 @@ const Marketing = ({ onClose }) => {
                           style={{
                             color: "#ffffff",
                             fontSize: "13px",
-                            fontWeight: "500",
-                            marginBottom: "6px",
+                            marginBottom: "4px",
                             display: "block",
                           }}
                         >
-                          Buton Metni
+                          Button Text
                         </label>
                         <input
                           type="text"
@@ -1854,7 +1935,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "11px",
                             color: "#8b8e95",
                             textAlign: "right",
-                            marginTop: "4px",
+                            marginTop: "2px",
                           }}
                         >
                           {websiteButtonText.length}/25
@@ -2280,7 +2361,6 @@ const Marketing = ({ onClose }) => {
                     </button>
                   </div>
                 )}
-
                 {/* Added Buttons List */}
                 {buttons.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
@@ -2499,240 +2579,179 @@ const Marketing = ({ onClose }) => {
           width: "clamp(300px, 25vw, 400px)",
           flexShrink: 0,
           overflow: "hidden",
-          backgroundColor: "#2c2f36",
+          backgroundColor: "#e5ddd5", // WhatsApp arka plan rengi (fallback)
+          backgroundImage: `url(${whatsappIcon})`, // Import edilen WhatsApp PNG
           margin: "20px 20px 20px 0",
           borderRadius: "8px",
           boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
           border: "1px solid #3a3d44",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        {/* Başlık */}
         <div
           style={{
-            padding: "20px",
-            borderBottom: "1px solid #3a3d44",
+            padding: "16px 16px",
+            backgroundColor: "#dcdedfff",
+            color: "#2e2d2dff",
+            fontWeight: "600",
+            fontSize: "16px",
           }}
         >
-          <h2
-            style={{
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "600",
-              margin: 0,
-            }}
-          >
-            Template Preview
-          </h2>
-          <p
-            style={{
-              color: "#8b8e95",
-              fontSize: "12px",
-              margin: "4px 0 0 0",
-            }}
-          >
-            Şablon Önizlemesi
-          </p>
+          Template Preview
         </div>
-        <div style={{ padding: "20px" }}>
-          {/* WhatsApp Tarzı Mesaj Balonu */}
+
+        {/* Mesaj Alanı */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            padding: "20px",
+            gap: "8px",
+            overflowY: "auto", // Kutu yapısında scroll
+          }}
+        >
+          {/* Gönderilen Mesaj */}
           <div
             style={{
-              backgroundColor: "#1a1d22",
-              border: "1px solid #3a3d44",
-              borderRadius: "8px",
-              padding: "20px",
-              minHeight: "200px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
+              alignSelf: "flex-end",
+              backgroundColor: "#dcf8c6",
+              borderRadius: "8px 8px 0 8px",
+              padding: "8px 10px",
+              maxWidth: "85%",
+              boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+              fontSize: "14px",
+              lineHeight: "1.4",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
             }}
           >
-            {/* Gönderilen Mesaj Balonu */}
+            {title && (
+              <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                {title}
+              </div>
+            )}
+            {getPreviewContent()}
+            {footerText && (
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontStyle: "italic",
+                  marginTop: "6px",
+                  color: "#555",
+                }}
+              >
+                {footerText}
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#888",
+                textAlign: "right",
+                marginTop: "2px",
+              }}
+            >
+              14:30 ✓✓
+            </div>
+          </div>
+
+          {/* Butonlar (tek balon içinde) */}
+          {buttons.length > 0 && (
             <div
               style={{
                 alignSelf: "flex-end",
                 maxWidth: "85%",
-                backgroundColor: "#25d366",
-                borderRadius: "18px 18px 4px 18px",
-                padding: "12px 16px",
-                marginBottom: "8px",
-                wordBreak: "break-word",
-                whiteSpace: "pre-wrap",
+                width: "100%",
+                backgroundColor: "#fff",
+                borderRadius: "8px 8px 0 8px",
+                boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+                overflow: "hidden",
+                fontSize: "14px",
               }}
             >
-              {/* Header */}
-              {title && (
-                <div
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    marginBottom: "6px",
-                  }}
-                >
-                  {title}
-                </div>
+              {(buttons.length <= 3 ? buttons : buttons.slice(0, 3)).map(
+                (btn, i) => {
+                  let icon = "";
+                  let textColor = "#027EB5";
+
+                  if (btn.type === "quick") icon = "↩️";
+                  if (btn.type === "website") icon = "🌐";
+                  if (btn.type === "whatsapp") icon = "📞";
+                  if (btn.type === "call") icon = "☎️";
+                  if (btn.type === "copy") icon = "📋";
+
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        padding: "10px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: textColor,
+                        cursor: "pointer",
+                        borderBottom:
+                          i !== buttons.length - 1
+                            ? "1px solid rgba(0,0,0,0.1)"
+                            : "none",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f5f5f5")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#fff")
+                      }
+                    >
+                      <span>{icon}</span>
+                      <span>{btn.text}</span>
+                    </div>
+                  );
+                }
               )}
 
-              {/* Body */}
-              <div
-                style={{
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  lineHeight: "1.4",
-                }}
-              >
-                {getPreviewContent()}
-              </div>
-
-              {/* Footer */}
-              {footerText && (
+              {buttons.length > 3 && (
                 <div
                   style={{
-                    marginTop: "8px",
-                    color: "#d3e4e3",
-                    fontSize: "11px",
-                    fontStyle: "italic",
-                    paddingTop: "3px",
+                    padding: "10px 12px",
+                    textAlign: "center",
+                    color: "#027EB5",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                    borderTop: "1px solid rgba(0,0,0,0.1)",
                   }}
                 >
-                  {footerText}
+                  🔽 See all options
                 </div>
               )}
-
-              <div
-                style={{
-                  textAlign: "right",
-                  marginTop: "4px",
-                  fontSize: "11px",
-                  color: "#b8d3d1",
-                }}
-              >
-                14:30 ✓✓
-              </div>
             </div>
+          )}
 
-            {/* Butonlar Önizlemesi */}
-            {buttons.length > 0 && (
-              <div
-                style={{
-                  marginTop: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                  alignSelf: "flex-end",
-                  maxWidth: "85%",
-                  width: "100%",
-                }}
-              >
-                {(buttons.length <= 3 ? buttons : buttons.slice(0, 3)).map(
-                  (btn, i) => {
-                    let icon = "";
-                    let bgColor = "#ffffff";
-                    let textColor = "#1a202c";
-
-                    if (btn.type === "quick") {
-                      icon = "↩️ ";
-                      bgColor = "#e8f5e8";
-                      textColor = "#0d7377";
-                    } else if (btn.type === "website") {
-                      icon = "🌐 ";
-                      bgColor = "#e6f0fa";
-                      textColor = "#275db5";
-                    } else if (btn.type === "whatsapp") {
-                      icon = "📞 ";
-                      bgColor = "#dcf8c6";
-                      textColor = "#25d366";
-                    } else if (btn.type === "call") {
-                      icon = "☎️ ";
-                      bgColor = "#fff3e0";
-                      textColor = "#e65100";
-                    } else if (btn.type === "copy") {
-                      icon = "📋 ";
-                      bgColor = "#f3e5f5";
-                      textColor = "#7b1fa2";
-                    }
-
-                    return (
-                      <button
-                        key={i}
-                        style={{
-                          background: bgColor,
-                          color: textColor,
-                          border: "none",
-                          borderRadius: "8px",
-                          padding: "10px 12px",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          textAlign: "left",
-                          cursor: "pointer",
-                          width: "100%",
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          transition: "all 0.2s ease",
-                        }}
-                        disabled
-                      >
-                        <span>{icon}</span>
-                        <span>{btn.text}</span>
-                      </button>
-                    );
-                  }
-                )}
-
-                {buttons.length > 3 && (
-                  <button
-                    style={{
-                      color: "#275db5",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      background: "#ffffff",
-                      borderRadius: "8px",
-                      padding: "10px 12px",
-                      border: "1px solid #e0e0e0",
-                      textAlign: "center",
-                      cursor: "pointer",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                    }}
-                    disabled
-                  >
-                    🔽 See all options
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Karşı Taraftan Gelen Cevap Simülasyonu */}
+          {/* Gelen Mesaj */}
+          <div
+            style={{
+              alignSelf: "flex-start",
+              backgroundColor: "#fff",
+              borderRadius: "8px 8px 8px 0",
+              padding: "8px 10px",
+              maxWidth: "70%",
+              boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+              fontSize: "14px",
+              lineHeight: "1.4",
+            }}
+          >
+            Teşekkürler! 👍
             <div
               style={{
-                alignSelf: "flex-start",
-                maxWidth: "70%",
-                backgroundColor: "#2a2a2a",
-                borderRadius: "18px 18px 18px 4px",
-                padding: "10px 14px",
-                marginTop: "8px",
+                fontSize: "11px",
+                color: "#888",
+                marginTop: "2px",
               }}
             >
-              <div
-                style={{
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  lineHeight: "1.4",
-                }}
-              >
-                Teşekkürler! 👍
-              </div>
-              <div
-                style={{
-                  textAlign: "left",
-                  marginTop: "4px",
-                  fontSize: "11px",
-                  color: "#8b8e95",
-                }}
-              >
-                14:31
-              </div>
+              14:31
             </div>
           </div>
         </div>
