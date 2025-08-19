@@ -1,28 +1,35 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Smile } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
 import marketingIcon from "../../assets/Marketing/marketing.svg";
 import utilityIcon from "../../assets/Marketing/utility.svg";
 import authIcon from "../../assets/Marketing/authentication.svg";
 import imageIcon from "../../assets/Marketing/image.svg";
 import videoIcon from "../../assets/Marketing/video.svg";
 import documentIcon from "../../assets/Marketing/document.svg";
-import phoneIcon from "../../assets/Marketing/call.svg";
-import copyIcon from "../../assets/Marketing/copy.svg";
 import campaignIcon from "../../assets/Marketing/campaign.svg";
-import customIcon from "../../assets/Marketing/custom.svg";
 import KonumIcon from "../../assets/Marketing/konum.svg";
-import websiteIcon from "../../assets/Marketing/website.png";
 import whatsappIcon from "../../assets/Marketing/whatsapp.png";
+import ButtonManager from "./ButtonManager";
+import quickIcon from "../../assets/Marketing/custom.svg";
+import websiteIcon from "../../assets/Marketing/website.png";
+import callIcon from "../../assets/Marketing/call.svg";
+import copyIcon from "../../assets/Marketing/copy.svg";
 
 const Marketing = ({ onClose }) => {
   const [campaignName, setCampaignName] = useState("");
   const [language, setLanguage] = useState("tr");
-  const [channel, setChannel] = useState("email");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [selectedSegments, setSelectedSegments] = useState(["all"]);
-
   const [buttons, setButtons] = useState([]);
+  const [footerText, setFooterText] = useState("");
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState("marketing");
+
+  // Template seçimleri için state'ler
+  const [selectedMarketingType, setSelectedMarketingType] = useState("default");
+  const [selectedUtilityType, setSelectedUtilityType] = useState("default");
+  const [selectedAuthType, setSelectedAuthType] = useState("otp");
 
   // Accordion states
   const [variableTypeOpen, setVariableTypeOpen] = useState(false);
@@ -30,48 +37,109 @@ const Marketing = ({ onClose }) => {
   const [selectedVariableType, setSelectedVariableType] = useState("numara");
   const [selectedMediaType, setSelectedMediaType] = useState("resim");
 
-  // Button states
-  const [buttonTypeSelectOpen, setButtonTypeSelectOpen] = useState(false);
-  const [selectedButtonType, setSelectedButtonType] = useState("");
-  const [quickReply, setQuickReply] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [websiteButtonText, setWebsiteButtonText] = useState("Visit website");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneButtonText, setPhoneButtonText] = useState("Call phone number");
-  const [countryCode, setCountryCode] = useState("TR +90");
-  const [offerCode, setOfferCode] = useState("");
-  const [offerButtonText, setOfferButtonText] = useState("Copy offer code");
-  const [showAllButtons, setShowAllButtons] = useState(false);
+  // Emoji picker state
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const [footerText, setFooterText] = useState("");
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState("marketing");
+  // WhatsApp formatlamasını önizlemede göstermek için fonksiyon
+  const formatWhatsAppText = (text) => {
+    if (!text) return "Mesaj içeriği burada görünecek";
 
-  const handleSegmentToggle = (segment) => {
-    setSelectedSegments((prev) =>
-      prev.includes(segment)
-        ? prev.filter((s) => s !== segment)
-        : [...prev, segment]
-    );
+    let formattedText = text;
+
+    // Değişkenleri değiştir
+    formattedText = formattedText.replace(/\{\{username\}\}/g, "Ahmet");
+    formattedText = formattedText.replace(/\{\{discount_code\}\}/g, "SAVE20");
+    formattedText = formattedText.replace(/\{\{company_name\}\}/g, "CallPilot");
+    formattedText = formattedText.replace(/\{\{expiry_date\}\}/g, "31.12.2024");
+
+    // WhatsApp formatlamasını JSX'e çevir
+    const parts = [];
+    let currentIndex = 0;
+
+    // Kalın (*text*), İtalik (_text_), Üstü çizili (~text~) için regex
+    const formatRegex = /(\*[^*]+\*|_[^_]+_|~[^~]+~)/g;
+
+    formattedText.split(formatRegex).forEach((part, index) => {
+      if (part.startsWith("*") && part.endsWith("*")) {
+        // Kalın
+        parts.push(<strong key={index}>{part.slice(1, -1)}</strong>);
+      } else if (part.startsWith("_") && part.endsWith("_")) {
+        // İtalik
+        parts.push(<em key={index}>{part.slice(1, -1)}</em>);
+      } else if (part.startsWith("~") && part.endsWith("~")) {
+        // Üstü çizili
+        parts.push(
+          <span key={index} style={{ textDecoration: "line-through" }}>
+            {part.slice(1, -1)}
+          </span>
+        );
+      } else {
+        // Normal metin
+        parts.push(part);
+      }
+    });
+
+    return parts;
   };
 
   const getPreviewContent = () => {
-    let previewBody = body || "Mesaj içeriği burada görünecek";
-    previewBody = previewBody.replace(/\{\{username\}\}/g, "Ahmet");
-    previewBody = previewBody.replace(/\{\{discount_code\}\}/g, "SAVE20");
-    previewBody = previewBody.replace(/\{\{company_name\}\}/g, "CallPilot");
-    previewBody = previewBody.replace(/\{\{expiry_date\}\}/g, "31.12.2024");
-    return previewBody;
+    return formatWhatsAppText(body);
+  };
+
+  // Emoji seçildiğinde
+  const onEmojiClick = (emojiObject) => {
+    setBody(body + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // Metin formatlaması için yardımcı fonksiyon
+  const formatText = (formatChar) => {
+    const textarea = document.querySelector(
+      'textarea[placeholder="Mesaj içeriğinizi girin..."]'
+    );
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = body.substring(start, end);
+
+    if (selectedText) {
+      // Seçili metin varsa formatla
+      const newText =
+        body.substring(0, start) +
+        formatChar +
+        selectedText +
+        formatChar +
+        body.substring(end);
+      setBody(newText);
+
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 1, end + 1);
+      }, 0);
+    } else {
+      // Seçili metin yoksa cursor pozisyonuna formatı ekle
+      const newText =
+        body.substring(0, start) +
+        formatChar +
+        formatChar +
+        body.substring(start);
+      setBody(newText);
+
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 1, start + 1);
+      }, 0);
+    }
   };
 
   const handleSave = () => {
     console.log("Kampanya kaydediliyor...", {
       campaignName,
       language,
-      channel,
       title,
       body,
-      selectedSegments,
+      buttons,
     });
     alert("Kampanya başarıyla kaydedildi!");
   };
@@ -86,35 +154,7 @@ const Marketing = ({ onClose }) => {
     alert("Kampanya başlatıldı!");
   };
 
-  // Button addition functions
-  const addButton = (type, data) => {
-    if (buttons.length >= 10) return;
-
-    const newButton = { type, ...data };
-    setButtons([...buttons, newButton]);
-
-    // Reset form fields
-    setQuickReply("");
-    setWebsiteUrl("");
-    setWebsiteButtonText("Visit website");
-    setPhoneNumber("");
-    setPhoneButtonText("Call phone number");
-    setOfferCode("");
-    setOfferButtonText("Copy offer code");
-    setSelectedButtonType("");
-  };
-
-  const removeButton = (index) => {
-    setButtons(buttons.filter((_, i) => i !== index));
-  };
-
-  const countryCodes = [
-    { code: "TR +90", name: "Türkiye" },
-    { code: "US +1", name: "Amerika" },
-    { code: "DE +49", name: "Almanya" },
-    { code: "FR +33", name: "Fransa" },
-    { code: "GB +44", name: "İngiltere" },
-  ];
+  const [showAllButtons, setShowAllButtons] = useState(false); // Yeni state
 
   return (
     <div
@@ -143,6 +183,7 @@ const Marketing = ({ onClose }) => {
           fontSize: "24px",
           cursor: "pointer",
           color: "#d64e4e",
+          zIndex: 101,
         }}
         title="Kapat"
       >
@@ -162,6 +203,7 @@ const Marketing = ({ onClose }) => {
           border: "1px solid #3a3d44",
         }}
       >
+        {/* Header ve Stepper aynı kalacak */}
         <div
           style={{
             padding: "15px 25px",
@@ -176,7 +218,6 @@ const Marketing = ({ onClose }) => {
               style={{
                 width: "40px",
                 height: "40px",
-
                 borderRadius: "6px",
                 display: "flex",
                 alignItems: "center",
@@ -226,7 +267,6 @@ const Marketing = ({ onClose }) => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
-            {/* Step 1 */}
             <div
               onClick={() => setCurrentStep(1)}
               style={{
@@ -263,7 +303,6 @@ const Marketing = ({ onClose }) => {
               </span>
             </div>
 
-            {/* Çizgi */}
             <div
               style={{
                 width: "40px",
@@ -272,7 +311,6 @@ const Marketing = ({ onClose }) => {
               }}
             />
 
-            {/* Step 2 */}
             <div
               onClick={() => setCurrentStep(2)}
               style={{
@@ -316,7 +354,7 @@ const Marketing = ({ onClose }) => {
           {currentStep === 1 ? (
             // Step 1: Set up template
             <div>
-              {/* Category Selection */}
+              {/* Category Selection - aynı kalacak */}
               <div style={{ marginBottom: "30px" }}>
                 <h3
                   style={{
@@ -357,7 +395,7 @@ const Marketing = ({ onClose }) => {
                       transform:
                         selectedCategory === "marketing"
                           ? "scale(1.05)"
-                          : "scale(1)", // seçilince büyütme
+                          : "scale(1)",
                     }}
                   >
                     <div
@@ -374,12 +412,12 @@ const Marketing = ({ onClose }) => {
                         style={{
                           width: "40px",
                           height: "40px",
-                          filter: "brightness(0) invert(1)", // her zaman beyaz
+                          filter: "brightness(0) invert(1)",
                           transition: "transform 0.2s ease",
                           transform:
                             selectedCategory === "marketing"
                               ? "scale(1.1)"
-                              : "scale(1)", // ikon da büyüsün
+                              : "scale(1)",
                         }}
                       />
                     </div>
@@ -426,11 +464,7 @@ const Marketing = ({ onClose }) => {
                       transform:
                         selectedCategory === "utility"
                           ? "scale(1.05)"
-                          : "scale(1)", // büyüme efekti
-                      boxShadow:
-                        selectedCategory === "utility"
-                          ? "0 4px 8px rgba(0,0,0,0.3)"
-                          : "none", // seçilince gölge
+                          : "scale(1)",
                     }}
                   >
                     <div
@@ -447,12 +481,12 @@ const Marketing = ({ onClose }) => {
                         style={{
                           width: "40px",
                           height: "40px",
-                          filter: "brightness(0) invert(1)", // her zaman beyaz
+                          filter: "brightness(0) invert(1)",
                           transition: "transform 0.2s ease",
                           transform:
                             selectedCategory === "utility"
                               ? "scale(1.1)"
-                              : "scale(1)", // ikon da büyüsün
+                              : "scale(1)",
                         }}
                       />
                     </div>
@@ -501,10 +535,6 @@ const Marketing = ({ onClose }) => {
                         selectedCategory === "authentication"
                           ? "scale(1.05)"
                           : "scale(1)",
-                      boxShadow:
-                        selectedCategory === "authentication"
-                          ? "0 4px 8px rgba(0,0,0,0.3)"
-                          : "none",
                     }}
                   >
                     <div
@@ -521,7 +551,7 @@ const Marketing = ({ onClose }) => {
                         style={{
                           width: "40px",
                           height: "40px",
-                          filter: "brightness(0) invert(1)", // her zaman beyaz
+                          filter: "brightness(0) invert(1)",
                           transition: "transform 0.2s ease",
                           transform:
                             selectedCategory === "authentication"
@@ -554,7 +584,7 @@ const Marketing = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Template Type Selection */}
+              {/* Template Type Selection - TIKLANABİLİR YAPILDI */}
               <div style={{ marginBottom: "30px" }}>
                 <h3
                   style={{
@@ -575,23 +605,37 @@ const Marketing = ({ onClose }) => {
                       gap: "12px",
                     }}
                   >
+                    {/* Default */}
                     <div
+                      onClick={() => setSelectedMarketingType("default")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedMarketingType === "default"
+                            ? "#275db5"
+                            : "#1e2025",
+                        border:
+                          selectedMarketingType === "default"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="marketingType"
                         value="default"
-                        defaultChecked
-                        style={{ accentColor: "#275db5" }}
+                        checked={selectedMarketingType === "default"}
+                        onChange={() => setSelectedMarketingType("default")}
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -614,22 +658,38 @@ const Marketing = ({ onClose }) => {
                         </p>
                       </div>
                     </div>
+
+                    {/* Catalog */}
                     <div
+                      onClick={() => setSelectedMarketingType("catalog")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedMarketingType === "catalog"
+                            ? "#275db5"
+                            : "#1e2025",
+                        border:
+                          selectedMarketingType === "catalog"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="marketingType"
                         value="catalog"
-                        style={{ accentColor: "#275db5" }}
+                        checked={selectedMarketingType === "catalog"}
+                        onChange={() => setSelectedMarketingType("catalog")}
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -653,22 +713,38 @@ const Marketing = ({ onClose }) => {
                         </p>
                       </div>
                     </div>
+
+                    {/* Calling permissions request */}
                     <div
+                      onClick={() => setSelectedMarketingType("permissions")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedMarketingType === "permissions"
+                            ? "#275db5"
+                            : "#1e2025",
+                        border:
+                          selectedMarketingType === "permissions"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="marketingType"
                         value="permissions"
-                        style={{ accentColor: "#275db5" }}
+                        checked={selectedMarketingType === "permissions"}
+                        onChange={() => setSelectedMarketingType("permissions")}
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -702,23 +778,37 @@ const Marketing = ({ onClose }) => {
                       gap: "12px",
                     }}
                   >
+                    {/* Default */}
                     <div
+                      onClick={() => setSelectedUtilityType("default")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedUtilityType === "default"
+                            ? "#275db5"
+                            : "#1e2025",
+                        border:
+                          selectedUtilityType === "default"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="utilityType"
                         value="default"
-                        defaultChecked
-                        style={{ accentColor: "#275db5" }}
+                        checked={selectedUtilityType === "default"}
+                        onChange={() => setSelectedUtilityType("default")}
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -741,22 +831,40 @@ const Marketing = ({ onClose }) => {
                         </p>
                       </div>
                     </div>
+
+                    {/* Account Update */}
                     <div
+                      onClick={() => setSelectedUtilityType("account_update")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedUtilityType === "account_update"
+                            ? "#275db5"
+                            : "#1e2025",
+                        border:
+                          selectedUtilityType === "account_update"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="utilityType"
-                        value="permissions"
-                        style={{ accentColor: "#275db5" }}
+                        value="account_update"
+                        checked={selectedUtilityType === "account_update"}
+                        onChange={() =>
+                          setSelectedUtilityType("account_update")
+                        }
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -766,7 +874,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Calling permissions request
+                          Account Update
                         </h4>
                         <p
                           style={{
@@ -775,7 +883,8 @@ const Marketing = ({ onClose }) => {
                             fontSize: "13px",
                           }}
                         >
-                          Müşterilerinizden WhatsApp üzerinden arama izni iste
+                          Hesap güncellemeleri ve durum değişiklikleri hakkında
+                          bilgilendir
                         </p>
                       </div>
                     </div>
@@ -791,22 +900,33 @@ const Marketing = ({ onClose }) => {
                     }}
                   >
                     <div
+                      onClick={() => setSelectedAuthType("otp")}
                       style={{
-                        backgroundColor: "#1e2025",
-                        border: "1px solid #3a3d44",
+                        backgroundColor:
+                          selectedAuthType === "otp" ? "#275db5" : "#1e2025",
+                        border:
+                          selectedAuthType === "otp"
+                            ? "2px solid #4b9fff"
+                            : "1px solid #3a3d44",
                         borderRadius: "8px",
                         padding: "15px",
                         display: "flex",
                         alignItems: "center",
                         gap: "15px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
                       }}
                     >
                       <input
                         type="radio"
                         name="authType"
                         value="otp"
-                        defaultChecked
-                        style={{ accentColor: "#275db5" }}
+                        checked={selectedAuthType === "otp"}
+                        onChange={() => setSelectedAuthType("otp")}
+                        style={{
+                          accentColor: "#275db5",
+                          pointerEvents: "none",
+                        }}
                       />
                       <div>
                         <h4
@@ -834,9 +954,9 @@ const Marketing = ({ onClose }) => {
               </div>
             </div>
           ) : (
-            // Step 2: Edit template (Existing campaign content)
+            // Step 2: Edit template
             <div>
-              {/* Kampanya Adı ve Dil Seçimi */}
+              {/* Kampanya Adı ve Dil */}
               <div
                 style={{
                   display: "flex",
@@ -846,11 +966,10 @@ const Marketing = ({ onClose }) => {
                   flexWrap: "wrap",
                 }}
               >
-                {/* Kampanya Adı */}
                 <div
                   style={{
-                    flex: "0 0 70%", // geniş ekranda %70 kaplar
-                    minWidth: "250px", // 250px altına düşerse alta geçer
+                    flex: "0 0 70%",
+                    minWidth: "250px",
                     boxSizing: "border-box",
                   }}
                 >
@@ -893,10 +1012,9 @@ const Marketing = ({ onClose }) => {
                   </div>
                 </div>
 
-                {/* Dil Seçimi */}
                 <div
                   style={{
-                    flex: "0 0 30%", // geniş ekranda %30 kaplar
+                    flex: "0 0 30%",
                     minWidth: "140px",
                     boxSizing: "border-box",
                   }}
@@ -932,284 +1050,6 @@ const Marketing = ({ onClose }) => {
                     <option value="fr">Fransızca</option>
                   </select>
                 </div>
-              </div>
-
-              {/* Değişken Türü Dropdown */}
-
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: 320,
-                  marginBottom: "20px",
-                }}
-              >
-                {/* Başlık */}
-                <div
-                  onClick={() => setVariableTypeOpen(!variableTypeOpen)}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 14px",
-                    backgroundColor: "#1e2025",
-                    border: "1px solid #3a3d44",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    width: "100%",
-                  }}
-                >
-                  <span>Değişken Türü</span>
-                  {variableTypeOpen ? (
-                    <ChevronUp size={16} />
-                  ) : (
-                    <ChevronDown size={16} />
-                  )}
-                </div>
-
-                {/* Açılan Menü */}
-                {variableTypeOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      zIndex: 999,
-                      width: "100%",
-                      backgroundColor: "#1e2025",
-                      border: "1px solid #3a3d44",
-                      borderTop: "none",
-                      borderRadius: "0 0 6px 6px",
-                      padding: "12px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {[
-                      { id: "numara", label: "Numara" },
-                      { id: "ad", label: "Ad" },
-                    ].map((type) => (
-                      <label
-                        key={type.id}
-                        style={{
-                          backgroundColor:
-                            selectedVariableType === type.id
-                              ? "#2d3036"
-                              : "#25272c",
-                          border:
-                            selectedVariableType === type.id
-                              ? "1px solid #4b9fff"
-                              : "1px solid #3a3d44",
-                          padding: "10px 12px",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          cursor: "pointer",
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.backgroundColor = "#2d3036")
-                        }
-                        onMouseLeave={(e) => {
-                          if (selectedVariableType !== type.id) {
-                            e.currentTarget.style.backgroundColor = "#25272c";
-                          }
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="variableType"
-                          value={type.id}
-                          checked={selectedVariableType === type.id}
-                          onChange={(e) =>
-                            setSelectedVariableType(e.target.value)
-                          }
-                          style={{
-                            accentColor: "#275db5",
-                            width: "10px",
-                            height: "10px",
-                            cursor: "pointer",
-                          }}
-                        />
-                        {type.label}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/*Medya Örneği*/}
-              <div
-                style={{
-                  position: "relative",
-                  maxWidth: 320,
-                  width: "100%",
-                  marginBottom: "20px",
-                }}
-              >
-                <div
-                  onClick={() => setMediaSampleOpen(!mediaSampleOpen)}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 14px",
-                    backgroundColor: "#1e2025",
-                    border: "1px solid #3a3d44",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    width: "100%",
-                  }}
-                >
-                  <span>Medya Örneği</span>
-                  {mediaSampleOpen ? (
-                    <ChevronUp size={16} />
-                  ) : (
-                    <ChevronDown size={16} />
-                  )}
-                </div>
-
-                {mediaSampleOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      zIndex: 999,
-                      border: "1px solid #3a3d44",
-                      borderTop: "none",
-                      borderRadius: "0 0 6px 6px",
-                      backgroundColor: "#1e2025",
-                      padding: "12px",
-                      width: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {[
-                      { id: "resim", label: "Resim", icon: imageIcon },
-                      { id: "video", label: "Video", icon: videoIcon },
-                      { id: "dokuman", label: "Doküman", icon: documentIcon },
-                      { id: "konum", label: "Konum", icon: KonumIcon },
-                    ].map((media) => {
-                      const isSelected = selectedMediaType === media.id;
-
-                      // Stilleri seçili/seçili değil durumuna göre hesaplıyoruz
-                      const baseBg = isSelected
-                        ? "linear-gradient(180deg, #2b2f36 0%, #23262c 100%)"
-                        : "#25272c";
-
-                      const borderColor = isSelected ? "#4b9fff" : "#3a3d44";
-
-                      const boxShadow = isSelected
-                        ? "0 0 0 1px rgba(75,159,255,0.35) inset, 0 6px 18px rgba(0,0,0,0.35)"
-                        : "0 2px 8px rgba(0,0,0,0.25)";
-
-                      return (
-                        <label
-                          key={media.id}
-                          style={{
-                            position: "relative",
-                            background: baseBg,
-                            border: `1px solid ${borderColor}`,
-                            padding: "10px 12px",
-                            borderRadius: "10px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            cursor: "pointer",
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            transition:
-                              "transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, border-color 0.2s ease",
-                            boxShadow,
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform =
-                              "translateY(-1px)";
-                            e.currentTarget.style.boxShadow = isSelected
-                              ? "0 0 0 1px rgba(75,159,255,0.45) inset, 0 10px 22px rgba(0,0,0,0.4)"
-                              : "0 6px 14px rgba(0,0,0,0.35)";
-                            // hover’da arka planı hafif aydınlat
-                            if (!isSelected) {
-                              e.currentTarget.style.background = "#2d3036";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.boxShadow = boxShadow;
-                            if (!isSelected) {
-                              e.currentTarget.style.background = "#25272c";
-                            }
-                          }}
-                        >
-                          {/* Sol vurgu şeridi (yalnızca seçiliyken görünür) */}
-                          <span
-                            aria-hidden="true"
-                            style={{
-                              position: "absolute",
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              width: isSelected ? "3px" : "0px",
-                              background:
-                                "linear-gradient(180deg, rgba(75,159,255,1) 0%, rgba(75,159,255,0.2) 100%)",
-                              borderTopLeftRadius: "10px",
-                              borderBottomLeftRadius: "10px",
-                              transition: "width 0.2s ease",
-                            }}
-                          />
-
-                          <input
-                            type="radio"
-                            name="mediaType"
-                            value={media.id}
-                            checked={isSelected}
-                            onChange={(e) =>
-                              setSelectedMediaType(e.target.value)
-                            }
-                            style={{
-                              accentColor: "#275db5",
-                              width: "12px",
-                              height: "12px",
-                              cursor: "pointer",
-                              flex: "0 0 auto",
-                            }}
-                          />
-
-                          {/* SVG İkon (aynen korunur) */}
-                          <img
-                            src={media.icon}
-                            alt={media.label}
-                            style={{
-                              width: "16px",
-                              height: "16px",
-                              // SVG’lerin görünümünü bozmamak için mevcut filter neyse koru:
-                              filter: "brightness(0) invert(1)",
-                              flex: "0 0 auto",
-                            }}
-                          />
-
-                          {/* Metin */}
-                          <span style={{ flex: 1, userSelect: "none" }}>
-                            {media.label}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
 
               {/* Başlık */}
@@ -1253,7 +1093,7 @@ const Marketing = ({ onClose }) => {
               </div>
 
               {/* Mesaj İçeriği */}
-              <div style={{ marginBottom: "20px" }}>
+              <div style={{ marginBottom: "20px", position: "relative" }}>
                 <label
                   style={{
                     display: "block",
@@ -1266,40 +1106,74 @@ const Marketing = ({ onClose }) => {
                   İçerik
                 </label>
 
-                {/* Text Formatting Toolbar */}
+                <textarea
+                  value={body}
+                  onChange={(e) =>
+                    e.target.value.length <= 1024 && setBody(e.target.value)
+                  }
+                  onKeyDown={(e) => {
+                    if (e.ctrlKey && e.key.toLowerCase() === "b") {
+                      e.preventDefault();
+                      formatText("*"); // Kalın
+                    }
+                    if (e.ctrlKey && e.key.toLowerCase() === "i") {
+                      e.preventDefault();
+                      formatText("_"); // İtalik
+                    }
+                    if (
+                      e.ctrlKey &&
+                      e.shiftKey &&
+                      e.key.toLowerCase() === "x"
+                    ) {
+                      e.preventDefault();
+                      formatText("~"); // Üstü çizili
+                    }
+                  }}
+                  placeholder="Mesaj içeriğinizi girin..."
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    border: "1px solid #3a3d44",
+                    borderRadius: "6px",
+                    fontSize: "15px", // biraz büyütüldü
+                    minHeight: "120px", // biraz daha büyük
+                    maxHeight: "250px",
+                    resize: "vertical",
+                    backgroundColor: "#1e2025",
+                    color: "#ffffff",
+                    overflowY: "auto",
+                  }}
+                />
+
+                {/* Karakter Sayacı */}
                 <div
                   style={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "30px",
+                    fontSize: "12px",
+                    color: body.length >= 1024 ? "#f87171" : "#9ca3af",
+                  }}
+                >
+                  {body.length}/1024
+                </div>
+
+                {/* Toolbar (textarea dışında, altında) */}
+                <div
+                  style={{
+                    marginTop: "8px",
                     display: "flex",
                     gap: "8px",
-                    marginBottom: "8px",
-                    padding: "8px",
-                    backgroundColor: "#1e2025",
-                    borderRadius: "6px 6px 0 0",
-                    border: "1px solid #3a3d44",
-                    borderBottom: "none",
                     flexWrap: "wrap",
+                    alignItems: "center",
+                    backgroundColor: "#1e2025",
+                    border: "1px solid #3a3d44",
+                    borderRadius: "6px",
+                    padding: "8px",
                   }}
                 >
                   <button
-                    onClick={() => {
-                      const textarea = document.querySelector(
-                        'textarea[placeholder="Mesaj içeriğinizi girin..."]'
-                      );
-                      const start = textarea.selectionStart;
-                      const end = textarea.selectionEnd;
-                      const selectedText = body.substring(start, end);
-                      const newText =
-                        body.substring(0, start) +
-                        "*" +
-                        selectedText +
-                        "*" +
-                        body.substring(end);
-                      setBody(newText);
-                      setTimeout(() => {
-                        textarea.focus();
-                        textarea.setSelectionRange(start + 1, end + 1);
-                      }, 0);
-                    }}
+                    onClick={() => formatText("*")}
                     style={{
                       padding: "6px 10px",
                       backgroundColor: "#25272c",
@@ -1310,31 +1184,12 @@ const Marketing = ({ onClose }) => {
                       cursor: "pointer",
                       fontWeight: "bold",
                     }}
-                    title="Kalın yazı (*metin*)"
+                    title="Kalın yazı (*metin*) – Ctrl+B"
                   >
                     <strong>B</strong>
                   </button>
-
                   <button
-                    onClick={() => {
-                      const textarea = document.querySelector(
-                        'textarea[placeholder="Mesaj içeriğinizi girin..."]'
-                      );
-                      const start = textarea.selectionStart;
-                      const end = textarea.selectionEnd;
-                      const selectedText = body.substring(start, end);
-                      const newText =
-                        body.substring(0, start) +
-                        "_" +
-                        selectedText +
-                        "_" +
-                        body.substring(end);
-                      setBody(newText);
-                      setTimeout(() => {
-                        textarea.focus();
-                        textarea.setSelectionRange(start + 1, end + 1);
-                      }, 0);
-                    }}
+                    onClick={() => formatText("_")}
                     style={{
                       padding: "6px 10px",
                       backgroundColor: "#25272c",
@@ -1345,31 +1200,12 @@ const Marketing = ({ onClose }) => {
                       cursor: "pointer",
                       fontStyle: "italic",
                     }}
-                    title="İtalik yazı (_metin_)"
+                    title="İtalik yazı (_metin_) – Ctrl+I"
                   >
                     <em>I</em>
                   </button>
-
                   <button
-                    onClick={() => {
-                      const textarea = document.querySelector(
-                        'textarea[placeholder="Mesaj içeriğinizi girin..."]'
-                      );
-                      const start = textarea.selectionStart;
-                      const end = textarea.selectionEnd;
-                      const selectedText = body.substring(start, end);
-                      const newText =
-                        body.substring(0, start) +
-                        "~" +
-                        selectedText +
-                        "~" +
-                        body.substring(end);
-                      setBody(newText);
-                      setTimeout(() => {
-                        textarea.focus();
-                        textarea.setSelectionRange(start + 1, end + 1);
-                      }, 0);
-                    }}
+                    onClick={() => formatText("~")}
                     style={{
                       padding: "6px 10px",
                       backgroundColor: "#25272c",
@@ -1380,96 +1216,108 @@ const Marketing = ({ onClose }) => {
                       cursor: "pointer",
                       textDecoration: "line-through",
                     }}
-                    title="Üstü çizili (~metin~)"
+                    title="Üstü çizili (~metin~) – Ctrl+Shift+X"
                   >
                     S
                   </button>
-
-                  <button
-                    onClick={() => setBody(body + "😊")}
-                    style={{
-                      padding: "6px 10px",
-                      backgroundColor: "#25272c",
-                      border: "1px solid #3a3d44",
-                      borderRadius: "4px",
-                      color: "#ffffff",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                    title="Emoji ekle"
-                  >
-                    😊
-                  </button>
-
+                  {/* Emoji Picker Butonu */}{" "}
+                  <div style={{ position: "relative" }}>
+                    {" "}
+                    <button
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      style={{
+                        padding: "6px 10px",
+                        backgroundColor: showEmojiPicker
+                          ? "#275db5"
+                          : "#25272c",
+                        border: "1px solid #3a3d44",
+                        borderRadius: "4px",
+                        color: "#ffffff",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                      title="Emoji seç"
+                    >
+                      {" "}
+                      <Smile size={14} /> Emoji{" "}
+                    </button>{" "}
+                    {/* Emoji Picker */}{" "}
+                    {showEmojiPicker && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "calc(100% + 8px)",
+                          left: 0,
+                          zIndex: 1000,
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {" "}
+                        <EmojiPicker
+                          onEmojiClick={onEmojiClick}
+                          theme="dark"
+                          width={300}
+                          height={400}
+                          searchDisabled={false}
+                          skinTonesDisabled={true}
+                          previewConfig={{ showPreview: false }}
+                        />{" "}
+                      </div>
+                    )}{" "}
+                  </div>
+                  {/* Emoji kısayolları */}
                   <button
                     onClick={() => setBody(body + "👍")}
                     style={{
-                      padding: "6px 10px",
+                      padding: "6px 8px",
                       backgroundColor: "#25272c",
                       border: "1px solid #3a3d44",
                       borderRadius: "4px",
                       color: "#ffffff",
-                      fontSize: "12px",
+                      fontSize: "14px",
                       cursor: "pointer",
                     }}
-                    title="Thumbs up"
                   >
                     👍
                   </button>
-
                   <button
                     onClick={() => setBody(body + "🎉")}
                     style={{
-                      padding: "6px 10px",
+                      padding: "6px 8px",
                       backgroundColor: "#25272c",
                       border: "1px solid #3a3d44",
                       borderRadius: "4px",
                       color: "#ffffff",
-                      fontSize: "12px",
+                      fontSize: "14px",
                       cursor: "pointer",
                     }}
-                    title="Celebration"
                   >
                     🎉
                   </button>
-
                   <button
                     onClick={() => setBody(body + "❤️")}
                     style={{
-                      padding: "6px 10px",
+                      padding: "6px 8px",
                       backgroundColor: "#25272c",
                       border: "1px solid #3a3d44",
                       borderRadius: "4px",
                       color: "#ffffff",
-                      fontSize: "12px",
+                      fontSize: "14px",
                       cursor: "pointer",
                     }}
-                    title="Heart"
                   >
                     ❤️
                   </button>
                 </div>
-
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  placeholder="Mesaj içeriğinizi girin..."
-                  style={{
-                    width: "100%",
-                    padding: "12px 16px",
-                    border: "1px solid #3a3d44",
-                    borderRadius: "0 0 6px 6px",
-                    fontSize: "14px",
-                    minHeight: "100px",
-                    maxHeight: "200px",
-                    resize: "vertical",
-                    backgroundColor: "#1e2025",
-                    color: "#ffffff",
-                    overflowY: "auto",
-                    borderTop: "none",
-                  }}
-                />
               </div>
+
+              {/* BUTONLAR KOMPONENTİ */}
+              <ButtonManager buttons={buttons} setButtons={setButtons} />
 
               {/* Footer */}
               <div style={{ marginBottom: "25px" }}>
@@ -1510,981 +1358,11 @@ const Marketing = ({ onClose }) => {
                   {footerText.length}/60
                 </div>
               </div>
-
-              {/* --- Butonlar Alanı --- */}
-              <div style={{ marginBottom: "25px" }}>
-                <label
-                  style={{
-                    color: "#ffffff",
-                    fontWeight: "500",
-                    fontSize: "14px",
-                    display: "block",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Butonlar{" "}
-                  <span style={{ color: "#8b8e95", fontWeight: "400" }}>
-                    - Opsiyonel
-                  </span>
-                </label>
-                <p
-                  style={{
-                    color: "#8b8e95",
-                    fontSize: "12px",
-                    margin: "0 0 15px 0",
-                    lineHeight: "1.4",
-                  }}
-                >
-                  Müşterilerinize mesajınıza cevap vermesi veya belirli bir
-                  işlem yapması için butonlar eklemenize yarar. En fazla 10
-                  buton eklenebilir. 3'ten fazla buton eklenirse, liste şeklinde
-                  görünür.
-                </p>
-                {/* Add Button + Dropdown */}
-                <div
-                  style={{
-                    width: "50%",
-                    position: "relative",
-                    marginBottom: "20px",
-                  }}
-                >
-                  {/* Add Button */}
-                  <button
-                    onClick={() =>
-                      setButtonTypeSelectOpen(!buttonTypeSelectOpen)
-                    }
-                    disabled={buttons.length >= 10}
-                    style={{
-                      padding: "10px 14px",
-                      backgroundColor:
-                        buttons.length >= 10 ? "#444" : "#275db5",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: buttons.length >= 10 ? "not-allowed" : "pointer",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    + Buton ekle
-                  </button>
-
-                  {/* Buton Türü Dropdown */}
-                  {buttonTypeSelectOpen && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "calc(100% + 6px)", // Butonun hemen altı
-                        left: 0,
-                        width: "100%",
-                        transition: "all 0.25s ease",
-                        opacity: buttonTypeSelectOpen ? 1 : 0,
-                        transform: buttonTypeSelectOpen
-                          ? "translateY(0)"
-                          : "translateY(-6px)",
-                        zIndex: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          padding: "12px",
-                          backgroundColor: "#1e2025",
-                          border: "1px solid #3a3d44",
-                          borderRadius: "6px",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.25)", // Açıldığında hafif gölge
-                        }}
-                      >
-                        {/* Custom Button */}
-                        <button
-                          style={{
-                            background:
-                              selectedButtonType === "quick"
-                                ? "#2d3036"
-                                : "transparent",
-                            color: "#fff",
-                            border:
-                              selectedButtonType === "quick"
-                                ? "1px solid #4b9fff"
-                                : "1px solid #3a3d44",
-                            borderRadius: "6px",
-                            padding: "10px 12px",
-                            textAlign: "left",
-                            cursor: "pointer",
-                            fontSize: "13px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                          onClick={() => {
-                            setSelectedButtonType("quick");
-                            setButtonTypeSelectOpen(false);
-                          }}
-                        >
-                          <img
-                            src={customIcon}
-                            alt="Custom"
-                            style={{
-                              width: "16px",
-                              height: "16px",
-                              filter: "brightness(0) invert(1)",
-                            }}
-                          />
-                          <div>
-                            <div style={{ fontWeight: "500" }}>Custom</div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "#8b8e95",
-                                marginTop: "2px",
-                              }}
-                            >
-                              Hızlı yanıt
-                            </div>
-                          </div>
-                        </button>
-
-                        {/* Diğer buton türleri */}
-                        {[
-                          {
-                            id: "website",
-                            label: "Visit Website",
-                            desc: "Web sitesi ziyaret et",
-                            icon: websiteIcon,
-                          },
-                          {
-                            id: "whatsapp",
-                            label: "Call on WhatsApp",
-                            desc: "WhatsApp üzerinden ara",
-                            icon: phoneIcon,
-                          },
-                          {
-                            id: "call",
-                            label: "Call Phone Number",
-                            desc: "Telefon numarasını ara",
-                            icon: phoneIcon,
-                          },
-                          {
-                            id: "copy",
-                            label: "Copy Offer Code",
-                            desc: "Teklif kodunu kopyala",
-                            icon: copyIcon,
-                          },
-                        ].map((type) => {
-                          const isAlreadyAdded = buttons.some(
-                            (btn) => btn.type === type.id
-                          );
-
-                          return (
-                            <button
-                              key={type.id}
-                              disabled={isAlreadyAdded}
-                              style={{
-                                background:
-                                  selectedButtonType === type.id
-                                    ? "#2d3036"
-                                    : isAlreadyAdded
-                                    ? "#1a1d22"
-                                    : "transparent",
-                                color: isAlreadyAdded ? "#666" : "#fff",
-                                border:
-                                  selectedButtonType === type.id
-                                    ? "1px solid #4b9fff"
-                                    : "1px solid #3a3d44",
-                                borderRadius: "6px",
-                                padding: "10px 12px",
-                                textAlign: "left",
-                                cursor: isAlreadyAdded
-                                  ? "not-allowed"
-                                  : "pointer",
-                                fontSize: "13px",
-                                opacity: isAlreadyAdded ? 0.5 : 1,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                              onClick={() => {
-                                if (!isAlreadyAdded) {
-                                  setSelectedButtonType(type.id);
-                                  setButtonTypeSelectOpen(false);
-                                }
-                              }}
-                            >
-                              <img
-                                src={type.icon}
-                                alt={type.label}
-                                style={{
-                                  width: "16px",
-                                  height: "16px",
-                                  filter: isAlreadyAdded
-                                    ? "brightness(0.3)"
-                                    : "brightness(0) invert(1)",
-                                }}
-                              />
-                              <div>
-                                <div style={{ fontWeight: "500" }}>
-                                  {type.label} {isAlreadyAdded && "(Eklendi)"}
-                                </div>
-                                <div
-                                  style={{
-                                    fontSize: "11px",
-                                    color: isAlreadyAdded ? "#555" : "#8b8e95",
-                                    marginTop: "2px",
-                                  }}
-                                >
-                                  {type.desc}
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {/* Quick Reply Form */}
-                {selectedButtonType === "quick" && (
-                  <div
-                    style={{
-                      background: "#1e2025",
-                      border: "1px solid #3a3d44",
-                      borderRadius: "8px",
-                      padding: "15px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Tür
-                      </label>
-                      <select
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          backgroundColor: "#25272c",
-                          border: "1px solid #3a3d44",
-                          borderRadius: "6px",
-                          color: "#ffffff",
-                          fontSize: "13px",
-                        }}
-                      >
-                        <option>Custom</option>
-                      </select>
-                    </div>
-
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Buton Metni
-                      </label>
-                      <input
-                        type="text"
-                        value={quickReply}
-                        maxLength={25}
-                        onChange={(e) => setQuickReply(e.target.value)}
-                        placeholder="Quick Reply"
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: "6px",
-                          border: "1px solid #3a3d44",
-                          backgroundColor: "#25272c",
-                          color: "#fff",
-                          fontSize: "13px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#8b8e95",
-                          textAlign: "right",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {quickReply.length}/25
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        if (quickReply.trim()) {
-                          addButton("quick", {
-                            text: quickReply.trim(),
-                          });
-                        }
-                      }}
-                      disabled={!quickReply.trim() || buttons.length >= 10}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor:
-                          !quickReply.trim() || buttons.length >= 10
-                            ? "#444"
-                            : "#275db5",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor:
-                          !quickReply.trim() || buttons.length >= 10
-                            ? "not-allowed"
-                            : "pointer",
-                        fontSize: "13px",
-                        width: "100%",
-                      }}
-                    >
-                      Ekle
-                    </button>
-                  </div>
-                )}
-
-                {/* Website Form */}
-                {selectedButtonType === "website" && (
-                  <div
-                    style={{
-                      background: "#1e2025",
-                      border: "1px solid #3a3d44",
-                      borderRadius: "8px",
-                      padding: "15px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "140px 1fr",
-                        gap: "12px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Type of Action
-                        </label>
-                        <select
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            backgroundColor: "#25272c",
-                            border: "1px solid #3a3d44",
-                            borderRadius: "6px",
-                            color: "#ffffff",
-                            fontSize: "13px",
-                          }}
-                        >
-                          <option>Visit website</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Button Text
-                        </label>
-                        <input
-                          type="text"
-                          value={websiteButtonText}
-                          maxLength={25}
-                          onChange={(e) => setWebsiteButtonText(e.target.value)}
-                          placeholder="Visit website"
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: "6px",
-                            border: "1px solid #3a3d44",
-                            backgroundColor: "#25272c",
-                            color: "#fff",
-                            fontSize: "13px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#8b8e95",
-                            textAlign: "right",
-                            marginTop: "2px",
-                          }}
-                        >
-                          {websiteButtonText.length}/25
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Website URL
-                      </label>
-                      <input
-                        type="url"
-                        value={websiteUrl}
-                        onChange={(e) => setWebsiteUrl(e.target.value)}
-                        placeholder="https://www.example.com"
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: "6px",
-                          border: "1px solid #3a3d44",
-                          backgroundColor: "#25272c",
-                          color: "#fff",
-                          fontSize: "13px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#8b8e95",
-                          marginTop: "4px",
-                        }}
-                      >
-                        0/2000
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        if (websiteUrl.trim() && websiteButtonText.trim()) {
-                          addButton("website", {
-                            text: websiteButtonText.trim(),
-                            url: websiteUrl.trim(),
-                          });
-                        }
-                      }}
-                      disabled={
-                        !websiteUrl.trim() ||
-                        !websiteButtonText.trim() ||
-                        buttons.length >= 10
-                      }
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor:
-                          !websiteUrl.trim() ||
-                          !websiteButtonText.trim() ||
-                          buttons.length >= 10
-                            ? "#444"
-                            : "#275db5",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor:
-                          !websiteUrl.trim() ||
-                          !websiteButtonText.trim() ||
-                          buttons.length >= 10
-                            ? "not-allowed"
-                            : "pointer",
-                        fontSize: "13px",
-                        width: "100%",
-                      }}
-                    >
-                      Ekle
-                    </button>
-                  </div>
-                )}
-
-                {/* Phone Call Form */}
-                {selectedButtonType === "call" && (
-                  <div
-                    style={{
-                      background: "#1e2025",
-                      border: "1px solid #3a3d44",
-                      borderRadius: "8px",
-                      padding: "15px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "140px 1fr",
-                        gap: "12px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Type of Action
-                        </label>
-                        <select
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            backgroundColor: "#25272c",
-                            border: "1px solid #3a3d44",
-                            borderRadius: "6px",
-                            color: "#ffffff",
-                            fontSize: "13px",
-                          }}
-                        >
-                          <option>Call phone number</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Button Text
-                        </label>
-                        <input
-                          type="text"
-                          value={phoneButtonText}
-                          maxLength={25}
-                          onChange={(e) => setPhoneButtonText(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: "6px",
-                            border: "1px solid #3a3d44",
-                            backgroundColor: "#25272c",
-                            color: "#fff",
-                            fontSize: "13px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#8b8e95",
-                            textAlign: "right",
-                            marginTop: "2px",
-                          }}
-                        >
-                          {phoneButtonText.length}/25
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "140px 1fr",
-                        gap: "12px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Country
-                        </label>
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            backgroundColor: "#25272c",
-                            border: "1px solid #3a3d44",
-                            borderRadius: "6px",
-                            color: "#ffffff",
-                            fontSize: "13px",
-                          }}
-                        >
-                          {countryCodes.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.code.split(" ")[1]}{" "}
-                              {country.code.split(" ")[0]}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          style={{
-                            color: "#ffffff",
-                            fontSize: "13px",
-                            marginBottom: "4px",
-                            display: "block",
-                          }}
-                        >
-                          Phone number
-                        </label>
-                        <input
-                          type="tel"
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          placeholder="Geçerli bir telefon numarası girin"
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: "6px",
-                            border:
-                              phoneNumber &&
-                              !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
-                                ? "1px solid #d64e4e"
-                                : "1px solid #3a3d44",
-                            backgroundColor: "#25272c",
-                            color: "#fff",
-                            fontSize: "13px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color:
-                              phoneNumber &&
-                              !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
-                                ? "#d64e4e"
-                                : "#8b8e95",
-                            marginTop: "2px",
-                          }}
-                        >
-                          {phoneNumber &&
-                          !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
-                            ? "⚠️ You need to enter a phone number. Please add a valid phone number."
-                            : "0/20"}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        if (
-                          phoneNumber.trim() &&
-                          phoneButtonText.trim() &&
-                          /^\d{10,}$/.test(phoneNumber.replace(/\s/g, ""))
-                        ) {
-                          addButton("call", {
-                            text: phoneButtonText.trim(),
-                            phone: phoneNumber.trim(),
-                            country: countryCode,
-                          });
-                        }
-                      }}
-                      disabled={
-                        !phoneNumber.trim() ||
-                        !phoneButtonText.trim() ||
-                        !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
-                        buttons.length >= 10
-                      }
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor:
-                          !phoneNumber.trim() ||
-                          !phoneButtonText.trim() ||
-                          !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
-                          buttons.length >= 10
-                            ? "#444"
-                            : "#275db5",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor:
-                          !phoneNumber.trim() ||
-                          !phoneButtonText.trim() ||
-                          !/^\d{10,}$/.test(phoneNumber.replace(/\s/g, "")) ||
-                          buttons.length >= 10
-                            ? "not-allowed"
-                            : "pointer",
-                        fontSize: "13px",
-                        width: "100%",
-                      }}
-                    >
-                      Ekle
-                    </button>
-                  </div>
-                )}
-                {selectedButtonType === "copy" && (
-                  <div
-                    style={{
-                      background: "#1e2025",
-                      border: "1px solid #3a3d44",
-                      borderRadius: "8px",
-                      padding: "15px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Buton Metni
-                      </label>
-                      <input
-                        type="text"
-                        value={offerButtonText}
-                        maxLength={25}
-                        onChange={(e) => setOfferButtonText(e.target.value)}
-                        placeholder="Copy offer code"
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: "6px",
-                          border: "1px solid #3a3d44",
-                          backgroundColor: "#25272c",
-                          color: "#fff",
-                          fontSize: "13px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#8b8e95",
-                          textAlign: "right",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {offerButtonText.length}/25
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          color: "#ffffff",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Teklif Kodu
-                      </label>
-                      <input
-                        type="text"
-                        value={offerCode}
-                        maxLength={15}
-                        onChange={(e) => setOfferCode(e.target.value)}
-                        placeholder="Enter sample"
-                        style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: "6px",
-                          border: "1px solid #3a3d44",
-                          backgroundColor: "#25272c",
-                          color: "#fff",
-                          fontSize: "13px",
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        if (offerCode.trim() && offerButtonText.trim()) {
-                          addButton("copy", {
-                            text: offerButtonText.trim(),
-                            code: offerCode.trim(),
-                          });
-                        }
-                      }}
-                      disabled={
-                        !offerCode.trim() ||
-                        !offerButtonText.trim() ||
-                        buttons.length >= 10
-                      }
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor:
-                          !offerCode.trim() ||
-                          !offerButtonText.trim() ||
-                          buttons.length >= 10
-                            ? "#444"
-                            : "#275db5",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor:
-                          !offerCode.trim() ||
-                          !offerButtonText.trim() ||
-                          buttons.length >= 10
-                            ? "not-allowed"
-                            : "pointer",
-                        fontSize: "13px",
-                        width: "100%",
-                      }}
-                    >
-                      Ekle
-                    </button>
-                  </div>
-                )}
-                {/* Added Buttons List */}
-                {buttons.length > 0 && (
-                  <div style={{ marginTop: "15px" }}>
-                    <div
-                      style={{
-                        color: "#ffffff",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      Eklenen Butonlar ({buttons.length}/10):
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                      }}
-                    >
-                      {(showAllButtons ? buttons : buttons.slice(0, 3)).map(
-                        (btn, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              background: "#23262b",
-                              color: "#fff",
-                              borderRadius: "6px",
-                              padding: "10px 12px",
-                              fontSize: "13px",
-                              border: "1px solid #3a3d44",
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <div style={{ flex: 1, overflow: "hidden" }}>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                  marginBottom: "2px",
-                                }}
-                              >
-                                {btn.type === "quick" && <span>↩️</span>}
-                                {btn.type === "website" && <span>🌐</span>}
-                                {btn.type === "whatsapp" && <span>📞</span>}
-                                {btn.type === "call" && <span>☎️</span>}
-                                {btn.type === "copy" && <span>📋</span>}
-                                <span style={{ fontWeight: "500" }}>
-                                  {btn.text}
-                                </span>
-                              </div>
-                              {btn.url && (
-                                <div
-                                  style={{ fontSize: "11px", color: "#8b8e95" }}
-                                >
-                                  {btn.url}
-                                </div>
-                              )}
-                              {btn.phone && (
-                                <div
-                                  style={{ fontSize: "11px", color: "#8b8e95" }}
-                                >
-                                  {btn.country} {btn.phone}
-                                </div>
-                              )}
-                              {btn.code && (
-                                <div
-                                  style={{ fontSize: "11px", color: "#8b8e95" }}
-                                >
-                                  Kod: {btn.code}
-                                </div>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => removeButton(i)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#d64e4e",
-                                cursor: "pointer",
-                                fontSize: "16px",
-                                padding: "4px",
-                                marginLeft: "8px",
-                              }}
-                              title="Butonu sil"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        )
-                      )}
-
-                      {buttons.length > 3 && (
-                        <button
-                          onClick={() => setShowAllButtons(!showAllButtons)}
-                          style={{
-                            color: "#275db5",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            background: "#23262b",
-                            borderRadius: "6px",
-                            padding: "10px 0",
-                            border: "1px solid #3a3d44",
-                            textAlign: "center",
-                          }}
-                        >
-                          {showAllButtons
-                            ? "Daha az göster"
-                            : `Tümünü Gör (${buttons.length})`}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - aynı kalacak */}
         <div
           style={{
             display: "flex",
@@ -2573,14 +1451,17 @@ const Marketing = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Sağ Önizleme Alanı */}
+      {/* GELİŞTİRİLMİŞ ÖNİZLEME ALANI */}
       <div
         style={{
           width: "clamp(300px, 25vw, 400px)",
           flexShrink: 0,
           overflow: "hidden",
-          backgroundColor: "#e5ddd5", // WhatsApp arka plan rengi (fallback)
-          backgroundImage: `url(${whatsappIcon})`, // Import edilen WhatsApp PNG
+          backgroundColor: "#e5ddd5",
+          backgroundImage: `url(${whatsappIcon})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           margin: "20px 20px 20px 0",
           borderRadius: "8px",
           boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
@@ -2589,7 +1470,6 @@ const Marketing = ({ onClose }) => {
           flexDirection: "column",
         }}
       >
-        {/* Başlık */}
         <div
           style={{
             padding: "16px 16px",
@@ -2602,7 +1482,6 @@ const Marketing = ({ onClose }) => {
           Template Preview
         </div>
 
-        {/* Mesaj Alanı */}
         <div
           style={{
             flex: 1,
@@ -2611,14 +1490,13 @@ const Marketing = ({ onClose }) => {
             justifyContent: "flex-end",
             padding: "20px",
             gap: "8px",
-            overflowY: "auto", // Kutu yapısında scroll
+            overflowY: "auto",
           }}
         >
-          {/* Gönderilen Mesaj */}
           <div
             style={{
               alignSelf: "flex-end",
-              backgroundColor: "#dcf8c6",
+              backgroundColor: "#ffffffff",
               borderRadius: "8px 8px 0 8px",
               padding: "8px 10px",
               maxWidth: "85%",
@@ -2631,20 +1509,22 @@ const Marketing = ({ onClose }) => {
           >
             {title && (
               <div style={{ fontWeight: "600", marginBottom: "4px" }}>
-                {title}
+                {formatWhatsAppText(title)}
               </div>
             )}
-            {getPreviewContent()}
+            <div style={{ marginBottom: footerText ? "6px" : "2px" }}>
+              {getPreviewContent()}
+            </div>
             {footerText && (
               <div
                 style={{
                   fontSize: "12px",
                   fontStyle: "italic",
-                  marginTop: "6px",
                   color: "#555",
+                  marginBottom: "2px",
                 }}
               >
-                {footerText}
+                {formatWhatsAppText(footerText)}
               </div>
             )}
             <div
@@ -2652,14 +1532,13 @@ const Marketing = ({ onClose }) => {
                 fontSize: "11px",
                 color: "#888",
                 textAlign: "right",
-                marginTop: "2px",
               }}
             >
               14:30 ✓✓
             </div>
           </div>
 
-          {/* Butonlar (tek balon içinde) */}
+          {/* Butonları göster */}
           {buttons.length > 0 && (
             <div
               style={{
@@ -2667,35 +1546,39 @@ const Marketing = ({ onClose }) => {
                 maxWidth: "85%",
                 width: "100%",
                 backgroundColor: "#fff",
-                borderRadius: "8px 8px 0 8px",
+                borderRadius: "8px",
                 boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
                 overflow: "hidden",
                 fontSize: "14px",
+                marginTop: "8px", // Mesaj içeriğiyle bitişik hale getirildi
+                padding: "10px", // Kutucuk içi boşluk
               }}
             >
-              {(buttons.length <= 3 ? buttons : buttons.slice(0, 3)).map(
+              {(showAllButtons ? buttons : buttons.slice(0, 3)).map(
                 (btn, i) => {
-                  let icon = "";
-                  let textColor = "#027EB5";
-
-                  if (btn.type === "quick") icon = "↩️";
-                  if (btn.type === "website") icon = "🌐";
-                  if (btn.type === "whatsapp") icon = "📞";
-                  if (btn.type === "call") icon = "☎️";
-                  if (btn.type === "copy") icon = "📋";
+                  // Buton türüne göre ikon seçimi
+                  let iconSrc = "";
+                  if (btn.type === "quick") iconSrc = quickIcon;
+                  if (btn.type === "website") iconSrc = websiteIcon;
+                  if (btn.type === "call") iconSrc = callIcon;
+                  if (btn.type === "copy") iconSrc = copyIcon;
 
                   return (
                     <div
                       key={i}
                       style={{
-                        padding: "10px 12px",
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px",
-                        color: textColor,
+                        gap: "10px", // İkon ve yazı arasındaki boşluk
+                        color: "#47bdf0ff", // Yazı rengi mavi
                         cursor: "pointer",
+                        padding: "8px 0", // Her butonun üst ve alt boşluğu
                         borderBottom:
-                          i !== buttons.length - 1
+                          i !==
+                          (showAllButtons
+                            ? buttons.length
+                            : Math.min(buttons.length, 3)) -
+                            1
                             ? "1px solid rgba(0,0,0,0.1)"
                             : "none",
                       }}
@@ -2706,8 +1589,24 @@ const Marketing = ({ onClose }) => {
                         (e.currentTarget.style.backgroundColor = "#fff")
                       }
                     >
-                      <span>{icon}</span>
-                      <span>{btn.text}</span>
+                      {/* SVG İkon */}
+                      <img
+                        src={iconSrc}
+                        alt={`${btn.type} icon`}
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter:
+                            "brightness(0) saturate(100%) hue-rotate(190deg)", // İkonları her zaman mavi yapar
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontWeight: "600", // Yazıyı daha kalın yapar
+                        }}
+                      >
+                        {btn.text}
+                      </span>
                     </div>
                   );
                 }
@@ -2723,14 +1622,14 @@ const Marketing = ({ onClose }) => {
                     cursor: "pointer",
                     borderTop: "1px solid rgba(0,0,0,0.1)",
                   }}
+                  onClick={() => setShowAllButtons(!showAllButtons)} // Tümünü göster/gizle
                 >
-                  🔽 See all options
+                  {showAllButtons ? "🔼 Kapat" : "🔽 Tümünü Görüntüle"}
                 </div>
               )}
             </div>
           )}
 
-          {/* Gelen Mesaj */}
           <div
             style={{
               alignSelf: "flex-start",
@@ -2756,6 +1655,22 @@ const Marketing = ({ onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Emoji picker dışına tıklandığında kapatmak için overlay */}
+      {showEmojiPicker && (
+        <div
+          onClick={() => setShowEmojiPicker(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+            backgroundColor: "transparent",
+          }}
+        />
+      )}
     </div>
   );
 };
