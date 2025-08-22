@@ -16,11 +16,28 @@ const ButtonManager = ({ buttons, setButtons }) => {
   const [countryCode, setCountryCode] = useState("TR +90");
   const [offerCode, setOfferCode] = useState("");
   const [offerButtonText, setOfferButtonText] = useState("Copy offer code");
+  // WhatsApp states eklendi
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [whatsappButtonText, setWhatsappButtonText] =
+    useState("Call on WhatsApp");
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState("TR +90");
+  const [whatsappActiveFor, setWhatsappActiveFor] = useState("1");
   const [showAllButtons, setShowAllButtons] = useState(false);
 
   // Button addition functions
   const addButton = (type, data) => {
-    if (buttons.length >= 10) return;
+    // WhatsApp ve Call için yalnızca bir butona izin ver
+    if (
+      (type === "whatsapp" || type === "call") &&
+      buttons.some((btn) => btn.type === type)
+    ) {
+      return;
+    }
+
+    // Custom ve Website için maksimum 10 buton kontrolü
+    if (buttons.length >= 10 && (type === "custom" || type === "website")) {
+      return;
+    }
 
     const newButton = { type, ...data };
     setButtons([...buttons, newButton]);
@@ -34,8 +51,11 @@ const ButtonManager = ({ buttons, setButtons }) => {
     setOfferCode("");
     setOfferButtonText("Copy offer code");
     setSelectedButtonType("");
+    setWhatsappNumber("");
+    setWhatsappButtonText("Call on WhatsApp");
+    setWhatsappActiveFor("1");
+    setSelectedButtonType("");
   };
-
   const removeButton = (index) => {
     setButtons(buttons.filter((_, i) => i !== index));
   };
@@ -46,6 +66,17 @@ const ButtonManager = ({ buttons, setButtons }) => {
     { code: "DE +49", name: "Almanya" },
     { code: "FR +33", name: "Fransa" },
     { code: "GB +44", name: "İngiltere" },
+  ];
+
+  // Active for options eklendi
+  const activeDays = [
+    { value: "1", label: "1 gün" },
+    { value: "2", label: "2 gün" },
+    { value: "3", label: "3 gün" },
+    { value: "4", label: "4 gün" },
+    { value: "5", label: "5 gün" },
+    { value: "6", label: "6 gün" },
+    { value: "7", label: "7 gün" },
   ];
 
   return (
@@ -193,6 +224,12 @@ const ButtonManager = ({ buttons, setButtons }) => {
                   id: "call",
                   label: "Call Phone Number",
                   desc: "Telefon numarasını ara",
+                  icon: phoneIcon,
+                },
+                {
+                  id: "whatsapp",
+                  label: "Call on WhatsApp",
+                  desc: "WhatsApp ile ara",
                   icon: phoneIcon,
                 },
                 {
@@ -798,6 +835,154 @@ const ButtonManager = ({ buttons, setButtons }) => {
           </button>
         </div>
       )}
+      {/* WhatsApp Call Form - YENİ EKLENEN */}
+      {selectedButtonType === "whatsapp" && (
+        <div
+          style={{
+            background: "#1e2025",
+            border: "1px solid #3a3d44",
+            borderRadius: "8px",
+            padding: "15px",
+            marginBottom: "15px",
+          }}
+        >
+          {/* İlk satır: Type of Action ve Button Text */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "140px 1fr",
+              gap: "12px",
+              marginBottom: "12px",
+            }}
+          >
+            <div>
+              <label
+                style={{
+                  color: "#ffffff",
+                  fontSize: "13px",
+                  marginBottom: "4px",
+                  display: "block",
+                }}
+              >
+                Type of Action
+              </label>
+              <select
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  backgroundColor: "#25272c",
+                  border: "1px solid #3a3d44",
+                  borderRadius: "6px",
+                  color: "#ffffff",
+                  fontSize: "13px",
+                }}
+              >
+                <option>Call on WhatsApp</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: "12px" }}>
+              <label
+                style={{
+                  color: "#ffffff",
+                  fontSize: "13px",
+                  marginBottom: "4px",
+                  display: "block",
+                }}
+              >
+                Aktiflik Süresi
+              </label>
+              <select
+                value={whatsappActiveFor}
+                onChange={(e) => setWhatsappActiveFor(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  backgroundColor: "#25272c",
+                  border: "1px solid #3a3d44",
+                  borderRadius: "6px",
+                  color: "#ffffff",
+                  fontSize: "13px",
+                }}
+              >
+                {activeDays.map((day) => (
+                  <option key={day.value} value={day.value}>
+                    {day.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* İkinci satır: Country ve WhatsApp Number */}
+          <div>
+            <label
+              style={{
+                color: "#ffffff",
+                fontSize: "13px",
+                marginBottom: "4px",
+                display: "block",
+              }}
+            >
+              Button Text
+            </label>
+            <input
+              type="text"
+              value={whatsappButtonText}
+              maxLength={25}
+              onChange={(e) => setWhatsappButtonText(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #3a3d44",
+                backgroundColor: "#25272c",
+                color: "#fff",
+                fontSize: "13px",
+              }}
+            />
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#8b8e95",
+                textAlign: "right",
+                marginTop: "2px",
+              }}
+            >
+              {whatsappButtonText.length}/25
+            </div>
+          </div>
+          {/* Ekle Butonu */}
+          <button
+            onClick={() => {
+              if (whatsappButtonText.trim()) {
+                addButton("whatsapp", {
+                  text: whatsappButtonText.trim(),
+                  activeFor: whatsappActiveFor,
+                });
+              }
+            }}
+            disabled={!whatsappButtonText.trim() || buttons.length >= 10} // Aktiflik kontrolü
+            style={{
+              padding: "8px 16px",
+              backgroundColor:
+                !whatsappButtonText.trim() || buttons.length >= 10
+                  ? "#444" // Pasif durum rengi
+                  : "#275db5", // Aktif durum rengi
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor:
+                !whatsappButtonText.trim() || buttons.length >= 10
+                  ? "not-allowed" // Pasif durum için cursor
+                  : "pointer", // Aktif durum için cursor
+              fontSize: "13px",
+              width: "100%",
+            }}
+          >
+            Ekle
+          </button>
+        </div>
+      )}
 
       {/* Copy Offer Code Form */}
       {selectedButtonType === "copy" && (
@@ -965,10 +1150,62 @@ const ButtonManager = ({ buttons, setButtons }) => {
                       marginBottom: "2px",
                     }}
                   >
-                    {btn.type === "quick" && <span>↩️</span>}
-                    {btn.type === "website" && <span>🌐</span>}
-                    {btn.type === "call" && <span>☎️</span>}
-                    {btn.type === "copy" && <span>📋</span>}
+                    {/* SVG İkonlar */}
+                    {btn.type === "quick" && (
+                      <img
+                        src={customIcon}
+                        alt="Quick Reply"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    )}
+                    {btn.type === "website" && (
+                      <img
+                        src={websiteIcon}
+                        alt="Visit Website"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    )}
+                    {btn.type === "call" && (
+                      <img
+                        src={phoneIcon}
+                        alt="Call Phone Number"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    )}
+                    {btn.type === "copy" && (
+                      <img
+                        src={copyIcon}
+                        alt="Copy Offer Code"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    )}
+                    {btn.type === "whatsapp" && (
+                      <img
+                        src={phoneIcon}
+                        alt="Call on WhatsApp"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    )}
                     <span style={{ fontWeight: "500" }}>{btn.text}</span>
                   </div>
                   {btn.url && (

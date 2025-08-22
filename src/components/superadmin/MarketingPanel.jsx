@@ -15,6 +15,8 @@ import quickIcon from "../../assets/Marketing/custom.svg";
 import websiteIcon from "../../assets/Marketing/website.png";
 import callIcon from "../../assets/Marketing/call.svg";
 import copyIcon from "../../assets/Marketing/copy.svg";
+import optionIcon from "../../assets/Marketing/option.svg";
+import meyvesebze from "../../assets/Marketing/meyvesebze.png";
 
 const Marketing = ({ onClose }) => {
   const [campaignName, setCampaignName] = useState("");
@@ -36,6 +38,40 @@ const Marketing = ({ onClose }) => {
   const [mediaSampleOpen, setMediaSampleOpen] = useState(false);
   const [selectedVariableType, setSelectedVariableType] = useState("numara");
   const [selectedMediaType, setSelectedMediaType] = useState("resim");
+
+  const [templateMessage, setTemplateMessage] = useState({
+    title: "Hey there! Check out our fresh groceries now! 🥦🍅🍌",
+    body: "Use code HEALTH to get additional 10% off on your entire purchase.",
+    footer:
+      "This template is good for: Welcome messages, promotions, offers, coupons, newsletters, announcements",
+  });
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+
+    if (category === "marketing") {
+      setTemplateMessage({
+        title: "Hey there! Check out our fresh groceries now! 🥦🍅🍌",
+        body: "Use code HEALTH to get additional 10% off on your entire purchase.",
+        footer:
+          "This template is good for: Welcome messages, promotions, offers, coupons, newsletters, announcements",
+      });
+    } else if (category === "utility") {
+      setTemplateMessage({
+        title: "Account updates and status changes notification.",
+        body: "Keep your account information up-to-date to enjoy our services.",
+        footer:
+          "This template is good for: Service notifications, account updates, status changes",
+      });
+    } else if (category === "authentication") {
+      setTemplateMessage({
+        title: "One-time password for secure login!",
+        body: "A verification code has been sent for your security.",
+        footer:
+          "This template is good for: Verification codes, security notifications",
+      });
+    }
+  };
 
   // Emoji picker state
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -645,7 +681,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Default
+                          Varsayılan
                         </h4>
                         <p
                           style={{
@@ -699,7 +735,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Catalog
+                          Katalog
                         </h4>
                         <p
                           style={{
@@ -754,7 +790,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Calling permissions request
+                          Arama İzin Talebi
                         </h4>
                         <p
                           style={{
@@ -818,7 +854,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Default
+                          Varsayılan
                         </h4>
                         <p
                           style={{
@@ -874,7 +910,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          Account Update
+                          Hesap Güncelleme
                         </h4>
                         <p
                           style={{
@@ -936,7 +972,7 @@ const Marketing = ({ onClose }) => {
                             fontSize: "14px",
                           }}
                         >
-                          One-time Passcode
+                          Tek Seferlik Şifre
                         </h4>
                         <p
                           style={{
@@ -1051,6 +1087,242 @@ const Marketing = ({ onClose }) => {
                   </select>
                 </div>
               </div>
+              {/* Değişken Türü Dropdown */}
+
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: 320,
+                  marginBottom: "20px",
+                }}
+              >
+                <div
+                  onClick={() => setVariableTypeOpen(!variableTypeOpen)}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 14px",
+                    backgroundColor: "#1e2025",
+                    border: "1px solid #3a3d44",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    color: "#ffffff",
+                    fontSize: "14px",
+                    width: "100%",
+                  }}
+                >
+                  <span>Değişken Türü</span>
+                  {variableTypeOpen ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </div>
+
+                {variableTypeOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      zIndex: 999,
+                      width: "100%",
+                      backgroundColor: "#1e2025",
+                      border: "1px solid #3a3d44",
+                      borderTop: "none",
+                      borderRadius: "0 0 6px 6px",
+                      padding: "12px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {[
+                      { id: "numara", label: "Numara", format: "{}" },
+                      { id: "ad", label: "Ad", format: "{{}}" },
+                    ].map((type) => (
+                      <label
+                        key={type.id}
+                        style={{
+                          backgroundColor:
+                            selectedVariableType === type.id
+                              ? "#2d3036"
+                              : "#25272c",
+                          border:
+                            selectedVariableType === type.id
+                              ? "1px solid #4b9fff"
+                              : "1px solid #3a3d44",
+                          padding: "10px 12px",
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          cursor: "pointer",
+                          color: "#ffffff",
+                          fontSize: "13px",
+                          transition: "all 0.2s ease",
+                        }}
+                        onClick={() => {
+                          setSelectedVariableType(type.id);
+                          setBody((prevBody) => prevBody + type.format); // İçeriğe ekleme
+                          setVariableTypeOpen(false); // Dropdown'u kapatma
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="variableType"
+                          value={type.id}
+                          checked={selectedVariableType === type.id}
+                          onChange={(e) =>
+                            setSelectedVariableType(e.target.value)
+                          }
+                          style={{
+                            accentColor: "#275db5",
+                            width: "10px",
+                            height: "10px",
+                            cursor: "pointer",
+                          }}
+                        />
+                        {type.label}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/*Medya Örneği*/}
+              <div
+                style={{
+                  position: "relative",
+                  maxWidth: 320,
+                  width: "100%",
+                  marginBottom: "20px",
+                }}
+              >
+                <div
+                  onClick={() => setMediaSampleOpen(!mediaSampleOpen)}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 14px",
+                    backgroundColor: "#1e2025",
+                    border: "1px solid #3a3d44",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    color: "#ffffff",
+                    fontSize: "14px",
+                    width: "100%",
+                  }}
+                >
+                  <span>Medya Türü</span>
+                  {mediaSampleOpen ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </div>
+
+                {mediaSampleOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      zIndex: 999,
+                      border: "1px solid #3a3d44",
+                      borderTop: "none",
+                      borderRadius: "0 0 6px 6px",
+                      backgroundColor: "#1e2025",
+                      padding: "12px",
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {[
+                      {
+                        id: "resim",
+                        label: "Resim",
+                        format: "[Resim]",
+                        icon: imageIcon,
+                      },
+                      {
+                        id: "video",
+                        label: "Video",
+                        format: "[Video]",
+                        icon: videoIcon,
+                      },
+                      {
+                        id: "dokuman",
+                        label: "Doküman",
+                        format: "[Doküman]",
+                        icon: documentIcon,
+                      },
+                      {
+                        id: "konum",
+                        label: "Konum",
+                        format: "[Konum]",
+                        icon: KonumIcon,
+                      },
+                    ].map((media) => (
+                      <label
+                        key={media.id}
+                        style={{
+                          backgroundColor:
+                            selectedMediaType === media.id
+                              ? "#2d3036"
+                              : "#25272c",
+                          border:
+                            selectedMediaType === media.id
+                              ? "1px solid #4b9fff"
+                              : "1px solid #3a3d44",
+                          padding: "10px 12px",
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          cursor: "pointer",
+                          color: "#ffffff",
+                          fontSize: "13px",
+                          transition: "all 0.2s ease",
+                        }}
+                        onClick={() => {
+                          setSelectedMediaType(media.id);
+                          setBody((prevBody) => prevBody + media.format); // İçeriğe ekleme
+                          setMediaSampleOpen(false); // Dropdown'u kapatma
+                        }}
+                      >
+                        <img
+                          src={media.icon}
+                          alt={`${media.label} icon`}
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            filter: "brightness(0) invert(1)",
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: "600", fontSize: "14px" }}>
+                            {media.label}
+                          </div>
+                          <div style={{ fontSize: "10px", color: "#8b8e95" }}>
+                            {media.id === "resim" && "Bir resim ekleyin."}
+                            {media.id === "video" && "Bir video ekleyin."}
+                            {media.id === "dokuman" && "Bir doküman ekleyin."}
+                            {media.id === "konum" && "Bir konum ekleyin."}
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Başlık */}
               <div style={{ marginBottom: "20px" }}>
@@ -1127,6 +1399,10 @@ const Marketing = ({ onClose }) => {
                     ) {
                       e.preventDefault();
                       formatText("~"); // Üstü çizili
+                    }
+                    if (e.ctrlKey && e.key === "`") {
+                      e.preventDefault();
+                      formatText("`"); // Kod bloğu
                     }
                   }}
                   placeholder="Mesaj içeriğinizi girin..."
@@ -1220,6 +1496,22 @@ const Marketing = ({ onClose }) => {
                   >
                     S
                   </button>
+                  <button
+                    onClick={() => formatText("`")}
+                    style={{
+                      padding: "6px 10px",
+                      backgroundColor: "#25272c",
+                      border: "1px solid #3a3d44",
+                      borderRadius: "4px",
+                      color: "#ffffff",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      fontFamily: "monospace",
+                    }}
+                    title="Kod bloğu (`metin`) – Ctrl+`"
+                  >
+                    {"</>"}
+                  </button>
                   {/* Emoji Picker Butonu */}{" "}
                   <div style={{ position: "relative" }}>
                     {" "}
@@ -1311,7 +1603,7 @@ const Marketing = ({ onClose }) => {
                       cursor: "pointer",
                     }}
                   >
-                    ❤️
+                    ☺️
                   </button>
                 </div>
               </div>
@@ -1452,205 +1744,224 @@ const Marketing = ({ onClose }) => {
       </div>
 
       {/* GELİŞTİRİLMİŞ ÖNİZLEME ALANI */}
+      {/* Ön izleme alanı */}
       <div
         style={{
-          width: "clamp(300px, 25vw, 400px)",
-          flexShrink: 0,
-          overflow: "hidden",
-          backgroundColor: "#e5ddd5",
-          backgroundImage: `url(${whatsappIcon})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          margin: "20px 20px 20px 0",
-          borderRadius: "8px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-          border: "1px solid #3a3d44",
+          width: "clamp(320px, 25vw, 400px)", // Responsive genişlik
+          backgroundColor: "#1a1a1a", // Siyahımsı arka plan
+          padding: "20px",
+          borderRadius: "12px",
           display: "flex",
           flexDirection: "column",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+          margin: "0 auto",
+          alignItems: "center",
         }}
       >
+        {/* Üstteki küçük kutucuk */}
         <div
           style={{
-            padding: "16px 16px",
-            backgroundColor: "#dcdedfff",
-            color: "#2e2d2dff",
-            fontWeight: "600",
-            fontSize: "16px",
+            width: "100%",
+            backgroundColor: "#e5ddd5",
+            backgroundImage: `url(${whatsappIcon})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            borderRadius: "10px",
+            border: "1px solid #3a3d44",
+            padding: "12px",
+            marginBottom: "25px",
           }}
         >
-          Template Preview
-        </div>
-
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            padding: "20px",
-            gap: "8px",
-            overflowY: "auto",
-          }}
-        >
+          {/* Header */}
           <div
             style={{
-              alignSelf: "flex-end",
-              backgroundColor: "#ffffffff",
-              borderRadius: "8px 8px 0 8px",
               padding: "8px 10px",
-              maxWidth: "85%",
-              boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+              backgroundColor: "#dcdedf",
+              color: "#2e2d2d",
+              fontWeight: "600",
               fontSize: "14px",
-              lineHeight: "1.4",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
+              borderRadius: "6px",
+              marginBottom: "8px",
             }}
           >
-            {title && (
-              <div style={{ fontWeight: "600", marginBottom: "4px" }}>
-                {formatWhatsAppText(title)}
-              </div>
-            )}
-            <div style={{ marginBottom: footerText ? "6px" : "2px" }}>
-              {getPreviewContent()}
-            </div>
-            {footerText && (
-              <div
-                style={{
-                  fontSize: "12px",
-                  fontStyle: "italic",
-                  color: "#555",
-                  marginBottom: "2px",
-                }}
-              >
-                {formatWhatsAppText(footerText)}
-              </div>
-            )}
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#888",
-                textAlign: "right",
-              }}
-            >
-              14:30 ✓✓
-            </div>
+            Template Preview
           </div>
-
-          {/* Butonları göster */}
-          {buttons.length > 0 && (
+          {/* Mesaj Alanı */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: "20px",
+              gap: "8px",
+              overflowY: "auto",
+            }}
+          >
+            {/* Kullanıcıya giden mesaj balonu */}
             <div
               style={{
                 alignSelf: "flex-end",
-                maxWidth: "85%",
-                width: "100%",
                 backgroundColor: "#fff",
-                borderRadius: "8px",
+                borderRadius: "8px 8px 0 8px",
+                padding: "8px 10px",
+                maxWidth: "85%",
                 boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
-                overflow: "hidden",
                 fontSize: "14px",
-                marginTop: "8px", // Mesaj içeriğiyle bitişik hale getirildi
-                padding: "10px", // Kutucuk içi boşluk
+                lineHeight: "1.4",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
               }}
             >
-              {(showAllButtons ? buttons : buttons.slice(0, 3)).map(
-                (btn, i) => {
-                  // Buton türüne göre ikon seçimi
-                  let iconSrc = "";
-                  if (btn.type === "quick") iconSrc = quickIcon;
-                  if (btn.type === "website") iconSrc = websiteIcon;
-                  if (btn.type === "call") iconSrc = callIcon;
-                  if (btn.type === "copy") iconSrc = copyIcon;
+              {title && (
+                <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                  {formatWhatsAppText(title)}
+                </div>
+              )}
+              <div style={{ marginBottom: footerText ? "6px" : "2px" }}>
+                {getPreviewContent()}
+              </div>
+              {footerText && (
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontStyle: "italic",
+                    color: "#555",
+                    marginBottom: "2px",
+                  }}
+                >
+                  {formatWhatsAppText(footerText)}
+                </div>
+              )}
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#888",
+                  textAlign: "right",
+                }}
+              >
+                14:30 ✓✓
+              </div>
 
-                  return (
+              {/* Butonlar Mesaj Balonuna Bitişik */}
+              {buttons.length > 0 && (
+                <div
+                  style={{
+                    marginTop: "6px",
+                    borderTop: "1px solid rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                    borderRadius: "0 0 8px 8px", // üst köşeleri düzleştir, altta balonla birleşsin
+                    overflow: "hidden",
+                    boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  {(showAllButtons ? buttons : buttons.slice(0, 3)).map(
+                    (btn, i) => {
+                      let iconSrc = "";
+                      if (btn.type === "quick") iconSrc = quickIcon;
+                      if (btn.type === "website") iconSrc = websiteIcon;
+                      if (btn.type === "whatsapp") iconSrc = callIcon;
+                      if (btn.type === "call") iconSrc = callIcon;
+                      if (btn.type === "copy") iconSrc = copyIcon;
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            color: "#47bdf0",
+                            cursor: "pointer",
+                            padding: "10px 12px",
+                            borderBottom:
+                              i !==
+                              (showAllButtons
+                                ? buttons.length
+                                : Math.min(buttons.length, 3)) -
+                                1
+                                ? "1px solid rgba(0,0,0,0.1)"
+                                : "none",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#f5f5f5")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#fff")
+                          }
+                        >
+                          <img
+                            src={iconSrc}
+                            alt={`${btn.type} icon`}
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              filter:
+                                "brightness(0) saturate(100%) hue-rotate(190deg)",
+                            }}
+                          />
+                          <span style={{ fontWeight: "600" }}>{btn.text}</span>
+                        </div>
+                      );
+                    }
+                  )}
+                  {buttons.length > 3 && (
                     <div
-                      key={i}
                       style={{
+                        padding: "10px 12px",
+                        textAlign: "center",
+                        color: "#47bdf0", // Renk mavi olarak ayarlandı
+                        fontWeight: "550",
+                        cursor: "pointer",
+                        borderTop: "1px solid rgba(0,0,0,0.1)",
                         display: "flex",
                         alignItems: "center",
-                        gap: "10px", // İkon ve yazı arasındaki boşluk
-                        color: "#47bdf0ff", // Yazı rengi mavi
-                        cursor: "pointer",
-                        padding: "8px 0", // Her butonun üst ve alt boşluğu
-                        borderBottom:
-                          i !==
-                          (showAllButtons
-                            ? buttons.length
-                            : Math.min(buttons.length, 3)) -
-                            1
-                            ? "1px solid rgba(0,0,0,0.1)"
-                            : "none",
+                        justifyContent: "center",
+                        gap: "8px",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#f5f5f5")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#fff")
-                      }
+                      onClick={() => setShowAllButtons(!showAllButtons)}
                     >
-                      {/* SVG İkon */}
                       <img
-                        src={iconSrc}
-                        alt={`${btn.type} icon`}
+                        src={optionIcon} // Option SVG kullanımı
+                        alt="Option Icon"
                         style={{
                           width: "16px",
                           height: "16px",
-                          filter:
-                            "brightness(0) saturate(100%) hue-rotate(190deg)", // İkonları her zaman mavi yapar
                         }}
                       />
-                      <span
-                        style={{
-                          fontWeight: "600", // Yazıyı daha kalın yapar
-                        }}
-                      >
-                        {btn.text}
+                      <span>
+                        {showAllButtons ? "Kapat" : "Tümünü Görüntüle"}
                       </span>
                     </div>
-                  );
-                }
-              )}
-
-              {buttons.length > 3 && (
-                <div
-                  style={{
-                    padding: "10px 12px",
-                    textAlign: "center",
-                    color: "#027EB5",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    borderTop: "1px solid rgba(0,0,0,0.1)",
-                  }}
-                  onClick={() => setShowAllButtons(!showAllButtons)} // Tümünü göster/gizle
-                >
-                  {showAllButtons ? "🔼 Kapat" : "🔽 Tümünü Görüntüle"}
+                  )}
                 </div>
               )}
             </div>
-          )}
 
-          <div
-            style={{
-              alignSelf: "flex-start",
-              backgroundColor: "#fff",
-              borderRadius: "8px 8px 8px 0",
-              padding: "8px 10px",
-              maxWidth: "70%",
-              boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
-              fontSize: "14px",
-              lineHeight: "1.4",
-            }}
-          >
-            Teşekkürler! 👍
+            {/* Cevap balonu */}
             <div
               style={{
-                fontSize: "11px",
-                color: "#888",
-                marginTop: "2px",
+                alignSelf: "flex-start",
+                backgroundColor: "#fff",
+                borderRadius: "8px 8px 8px 0",
+                padding: "8px 10px",
+                maxWidth: "70%",
+                boxShadow: "0 1px 1px rgba(0,0,0,0.2)",
+                fontSize: "14px",
+                lineHeight: "1.4",
               }}
             >
-              14:31
+              Teşekkürler! 👍
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#888",
+                  marginTop: "2px",
+                }}
+              >
+                14:31
+              </div>
             </div>
           </div>
         </div>
