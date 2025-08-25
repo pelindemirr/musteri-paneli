@@ -32,7 +32,6 @@ const Marketing = ({ onClose }) => {
   const [selectedMarketingType, setSelectedMarketingType] = useState("default");
   const [selectedUtilityType, setSelectedUtilityType] = useState("default");
   const [selectedAuthType, setSelectedAuthType] = useState("otp");
-
   // Accordion states
   const [variableTypeOpen, setVariableTypeOpen] = useState(false);
   const [mediaSampleOpen, setMediaSampleOpen] = useState(false);
@@ -40,39 +39,59 @@ const Marketing = ({ onClose }) => {
   const [selectedMediaType, setSelectedMediaType] = useState("resim");
 
   const [templateMessage, setTemplateMessage] = useState({
-    title: "Hey there! Check out our fresh groceries now! 🥦🍅🍌",
-    body: "Use code HEALTH to get additional 10% off on your entire purchase.",
-    footer:
-      "This template is good for: Welcome messages, promotions, offers, coupons, newsletters, announcements",
+    title: "Şablon Önizleme",
+    body: "🛒 *Taze meyve ve sebzelerimizi keşfedin!*\n\nDoğal ve organik ürünlerimizle sağlıklı yaşamın tadını çıkarın. Şimdi %20 indirimle!",
+    footer: "",
+    showImage: true,
   });
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-
-    if (category === "marketing") {
-      setTemplateMessage({
-        title: "Hey there! Check out our fresh groceries now! 🥦🍅🍌",
-        body: "Use code HEALTH to get additional 10% off on your entire purchase.",
-        footer:
-          "This template is good for: Welcome messages, promotions, offers, coupons, newsletters, announcements",
-      });
-    } else if (category === "utility") {
-      setTemplateMessage({
-        title: "Account updates and status changes notification.",
-        body: "Keep your account information up-to-date to enjoy our services.",
-        footer:
-          "This template is good for: Service notifications, account updates, status changes",
-      });
-    } else if (category === "authentication") {
-      setTemplateMessage({
-        title: "One-time password for secure login!",
-        body: "A verification code has been sent for your security.",
-        footer:
-          "This template is good for: Verification codes, security notifications",
-      });
-    }
+    updateTemplateMessage(
+      category,
+      selectedMarketingType,
+      selectedUtilityType,
+      selectedAuthType
+    );
+    const updateTemplateMessage = (
+      category,
+      marketingType,
+      utilityType,
+      authType
+    ) => {
+      if (category === "marketing") {
+        if (marketingType === "catalog") {
+          setTemplateMessage({
+            title: "Şablon Önizleme",
+            body: "🛒 *Taze meyve ve sebzelerimizi keşfedin!*\n\nDoğal ve organik ürünlerimizle sağlıklı yaşamın tadını çıkarın. Şimdi %20 indirimle!\n\n🥗 Sepete ekle ve hemen sipariş ver",
+            footer: "",
+            showImage: true,
+          });
+        } else {
+          setTemplateMessage({
+            title: "Şablon Önizleme",
+            body: "🛒 *Taze meyve ve sebzelerimizi keşfedin!*\n\nDoğal ve organik ürünlerimizle sağlıklı yaşamın tadını çıkarın. Şimdi %20 indirimle!",
+            footer: "",
+            showImage: true,
+          });
+        }
+      } else if (category === "utility") {
+        setTemplateMessage({
+          title: "Şablon Önizleme",
+          body: "📩 *Müjde! Siparişiniz 23KFEJJ2312 kargoya verildi!*\n\nİşte takip bilgileriniz, lütfen aşağıdaki bağlantıyı kontrol edin.\n\n🔗 *Gönderiyi takip et*",
+          footer: "",
+          showImage: false,
+        });
+      } else if (category === "authentication") {
+        setTemplateMessage({
+          title: "Şablon Önizleme",
+          body: "🔐 *Güvenlik Kodunuz: 123456*\n\nBu kodu kimseyle paylaşmayın. Kod 5 dakika içinde geçerliliğini yitirecektir.\n\n✅ Güvenli giriş için kodu girin",
+          footer: "",
+          showImage: false,
+        });
+      }
+    };
   };
-
   // Emoji picker state
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -1814,26 +1833,82 @@ const Marketing = ({ onClose }) => {
                 wordBreak: "break-word",
               }}
             >
-              {title && (
-                <div style={{ fontWeight: "600", marginBottom: "4px" }}>
-                  {formatWhatsAppText(title)}
-                </div>
-              )}
-              <div style={{ marginBottom: footerText ? "6px" : "2px" }}>
-                {getPreviewContent()}
-              </div>
-              {footerText && (
+              {/* Görsel - sadece showImage true ise göster */}
+              {templateMessage.showImage && (
                 <div
                   style={{
-                    fontSize: "12px",
-                    fontStyle: "italic",
-                    color: "#555",
-                    marginBottom: "2px",
+                    width: "100%",
+                    backgroundColor: "#e5ddd5",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    marginBottom: "15px",
                   }}
                 >
-                  {formatWhatsAppText(footerText)}
+                  <img
+                    src={meyvesebze}
+                    alt="Template Görseli"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                    }}
+                  />
                 </div>
               )}
+
+              {/* Step 1'deyken template mesajını göster, Step 2'deyken kullanıcı girişini göster */}
+              {currentStep === 1 ? (
+                <>
+                  {templateMessage.title && (
+                    <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                      {formatWhatsAppText(templateMessage.title)}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      marginBottom: templateMessage.footer ? "6px" : "2px",
+                    }}
+                  >
+                    {formatWhatsAppText(templateMessage.body)}
+                  </div>
+                  {templateMessage.footer && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontStyle: "italic",
+                        color: "#555",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {formatWhatsAppText(templateMessage.footer)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {title && (
+                    <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                      {formatWhatsAppText(title)}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: footerText ? "6px" : "2px" }}>
+                    {getPreviewContent()}
+                  </div>
+                  {footerText && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontStyle: "italic",
+                        color: "#555",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {formatWhatsAppText(footerText)}
+                    </div>
+                  )}
+                </>
+              )}
+
               <div
                 style={{
                   fontSize: "11px",
@@ -1844,8 +1919,8 @@ const Marketing = ({ onClose }) => {
                 14:30 ✓✓
               </div>
 
-              {/* Butonlar Mesaj Balonuna Bitişik */}
-              {buttons.length > 0 && (
+              {/* Butonlar sadece Step 2'de göster */}
+              {currentStep === 2 && buttons.length > 0 && (
                 <div
                   style={{
                     marginTop: "6px",
